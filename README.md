@@ -4,3 +4,4 @@
 - 容器及代理：dockerfile docker-compose.yml
 - 创建入口文件，开启http（gin），设计路由
 - docker-compose up 启动项目
+- 添加项目githuh持续集成 github-workflows
