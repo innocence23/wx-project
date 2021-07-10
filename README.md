@@ -1,0 +1,6 @@
+# wx服务
+
+# 初始化项目
+- 容器及代理：dockerfile docker-compose.yml
+- 创建入口文件，开启http（gin），设计路由
+- docker-compose up 启动项目
