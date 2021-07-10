@@ -11,7 +11,8 @@ import (
 )
 
 type UserHandler struct {
-	UserService model.UserService
+	UserService  model.UserService
+	TokenService model.TokenService
 }
 
 // Me handler calls services for getting
@@ -37,10 +38,47 @@ func (h *UserHandler) Me(c *gin.Context) {
 
 }
 
+type signupReq struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,gte=6,lte=30"`
+}
+
 // Signup handler
 func (h *UserHandler) Signup(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's signup",
+	var req signupReq
+	if err := c.Bind(&req); err != nil {
+		log.Printf("Failed to sign up user: %v\n", err.Error())
+		c.JSON(zerror.Status(err), gin.H{
+			"error": err,
+		})
+	}
+
+	u := &model.User{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	err := h.UserService.Signup(c, u)
+	if err != nil {
+		log.Printf("Failed to sign up user: %v\n", err.Error())
+		c.JSON(zerror.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	// create token pair as strings
+	tokens, err := h.TokenService.NewPairFromUser(c, u, "")
+
+	if err != nil {
+		log.Printf("Failed to create tokens for user: %v\n", err.Error())
+		c.JSON(zerror.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"tokens": tokens,
 	})
 }
 

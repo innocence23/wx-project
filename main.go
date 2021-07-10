@@ -8,15 +8,18 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"wx/app/component"
 	"wx/app/handler"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log.Println("Starting server...")
 
-	router := gin.Default()
+	db := component.InitDB()
+	router, err := inject(db)
+	if err != nil {
+		log.Fatalf("Initialize inject error : %v\n", err)
+	}
 
 	handler.NewHandler(&handler.Config{
 		R: router,

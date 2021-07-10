@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	R           *gin.Engine
-	UserService model.UserService
+	R            *gin.Engine
+	UserService  model.UserService
+	TokenService model.TokenService
 }
 
 func NewHandler(c *Config) {
@@ -17,7 +18,8 @@ func NewHandler(c *Config) {
 	g := c.R.Group(os.Getenv("WX_API_URL"))
 
 	uh := &UserHandler{
-		UserService: c.UserService,
+		UserService:  c.UserService,
+		TokenService: c.TokenService,
 	}
 	g.GET("/me", uh.Me)
 	g.POST("/signup", uh.Signup)

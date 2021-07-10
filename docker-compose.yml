@@ -29,3 +29,26 @@ services:
       - ./:/go/src/app
     # have to use $$ (double-dollar) so docker doesn't try to substitute a variable
     command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+  mysql-wx:
+    image: mysql:5.7.16
+    volumes:
+      - "mysqldata_wx:/var/lib/mysql"
+      # - "./conf/my.cnf:/etc/my.cnf"
+      # 数据库还原目录 可将需要还原的sql文件放在这里
+      # - ./init:/docker-entrypoint-initdb.d
+    environment:
+      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_DATABASE=mywx"
+      - "TZ=Asia/Shanghai"
+    ports:
+      - 33060:3306
+  redis-wx:
+    image: "redis:alpine"
+    ports:
+      - "63790:6379"
+    volumes:
+      - "redisdata_wx:/data"
+
+volumes:
+  mysqldata_wx:
+  redisdata_wx:
