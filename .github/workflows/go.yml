@@ -1,4 +1,4 @@
-name: TechMojotvGo
+name: WxProjectGo
 on: push
 jobs:
   build:
