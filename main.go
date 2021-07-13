@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 	"wx/app/component"
-	"wx/app/handler"
 )
 
 func main() {
@@ -20,10 +19,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Initialize inject error : %v\n", err)
 	}
-
-	handler.NewHandler(&handler.Config{
-		R: router,
-	})
 
 	srv := &http.Server{
 		Addr:    ":8080",
