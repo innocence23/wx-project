@@ -7,7 +7,7 @@ import (
 	"wx/app/zerror"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/spf13/cast"
 )
 
 type UserHandler struct {
@@ -18,13 +18,13 @@ type UserHandler struct {
 // Me handler calls services for getting
 func (h *UserHandler) Me(c *gin.Context) {
 
-	uid, _ := uuid.NewRandom()
+	var id int64 = 1
 
-	u, err := h.UserService.Get(c, uid)
+	u, err := h.UserService.Get(c, id)
 
 	if err != nil {
-		log.Printf("Unable to find user: %v\n%v", uid, err)
-		e := zerror.NewNotFound("user", uid.String())
+		log.Printf("Unable to find user: %v\n%v", id, err)
+		e := zerror.NewNotFound("user", cast.ToString(id))
 
 		c.JSON(e.Status(), gin.H{
 			"error": e,

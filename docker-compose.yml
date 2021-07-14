@@ -16,6 +16,7 @@ services:
       context: .
       target: builder
     image: project_wx
+    restart: always  #解决mysql启动后，还没创建完数据库，程序报错问题
     expose:
       - "8080"
     labels:
@@ -28,7 +29,6 @@ services:
       - mysql
     volumes:
       - ./:/go/src/app
-    # have to use $$ (double-dollar) so docker doesn't try to substitute a variable
     command: reflex -r "\.go$$" -s -- sh -c "go run ./"
   mysql:
     image: mysql:5.7
@@ -41,14 +41,14 @@ services:
       - 33060:3306
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      #- mysqldatax:/var/lib/mysql  #不能加一加就错
+      - mysqldataz:/var/lib/mysql  #不能加一加就错
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
     ports:
-      - "63790:6379"
+      - 63790:6379
     volumes:
-      - "redisdatax:/data"
+      - redisdataz:/data
 
 volumes:
-  mysqldatax:
-  redisdatax:
+  mysqldataz:
+  redisdataz:

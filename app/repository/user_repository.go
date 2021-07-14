@@ -6,7 +6,7 @@ import (
 	"wx/app/model"
 	"wx/app/zerror"
 
-	"github.com/google/uuid"
+	"github.com/spf13/cast"
 	"gorm.io/gorm"
 )
 
@@ -20,10 +20,10 @@ func NewUserRepository(db *gorm.DB) model.UserRepository {
 	}
 }
 
-func (r *UserRepository) FindByID(ctx context.Context, uid uuid.UUID) (*model.User, error) {
+func (r *UserRepository) FindByID(ctx context.Context, id int64) (*model.User, error) {
 	user := &model.User{}
-	if err := r.DB.Find(user, uid); err != nil {
-		return user, zerror.NewNotFound("uid", uid.String())
+	if err := r.DB.Find(user, id); err != nil {
+		return user, zerror.NewNotFound("uid", cast.ToString(id))
 	}
 	return user, nil
 }

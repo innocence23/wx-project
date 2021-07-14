@@ -1,15 +1,14 @@
 package model
 
-import (
-	"github.com/google/uuid"
-)
+import "time"
 
-// User defines domain model and its json and db representations
 type User struct {
-	UID      uuid.UUID `db:"uid" json:"uid"`
-	Email    string    `db:"email" json:"email"`
-	Password string    `db:"password" json:"-"`
-	Name     string    `db:"name" json:"name"`
-	ImageURL string    `db:"image_url" json:"imageUrl"`
-	Website  string    `db:"website" json:"website"`
+	ID        int64     `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
+	Name      string    `gorm:"column:name;NOT NULL" json:"name"`
+	Email     string    `gorm:"column:email;NOT NULL" json:"email"`
+	Password  string    `gorm:"column:password;NOT NULL" json:"password"`
+	Avatar    string    `gorm:"column:avatar;NOT NULL" json:"avatar"`
+	Status    int       `gorm:"column:status;default:1;NOT NULL" json:"status"`
+	CreatedAt time.Time `gorm:"column:created_at;NOT NULL" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at;NOT NULL" json:"updated_at"`
 }

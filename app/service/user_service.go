@@ -10,7 +10,6 @@ import (
 	"wx/app/model"
 	"wx/app/zerror"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -24,8 +23,8 @@ func NewUserService(ur model.UserRepository) model.UserService {
 	}
 }
 
-func (s *UserService) Get(ctx context.Context, uid uuid.UUID) (*model.User, error) {
-	u, err := s.UserRepository.FindByID(ctx, uid)
+func (s *UserService) Get(ctx context.Context, id int64) (*model.User, error) {
+	u, err := s.UserRepository.FindByID(ctx, id)
 	return u, err
 }
 
