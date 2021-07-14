@@ -21,12 +21,9 @@ func NewHandler(c *Config) {
 		UserService:  c.UserService,
 		TokenService: c.TokenService,
 	}
-	g.GET("/me", uh.Me)
 	g.POST("/signup", uh.Signup)
 	g.POST("/signin", uh.Signin)
 	g.POST("/signout", uh.Signout)
-	g.POST("/tokens", uh.Tokens)
-	g.POST("/image", uh.Image)
-	g.DELETE("/image", uh.DeleteImage)
-	g.PUT("/details", uh.Details)
+	g.PUT("/user", uh.UpdateUser)
+	g.GET("/user", uh.Me)
 }
