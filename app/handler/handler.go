@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"os"
 	"wx/app/model"
 
 	"github.com/gin-gonic/gin"
@@ -11,22 +10,16 @@ import (
 type Config struct {
 	R           *gin.Engine
 	UserService model.UserService
+	BaseUrlPath string
 }
 
 func NewHandler(c *Config) {
-	g := c.R.Group(os.Getenv("WX_API_URL_V1"))
+	g := c.R.Group(c.BaseUrlPath)
 
-	uh := &UserHandler{
-		UserService: c.UserService,
-	}
-	g.POST("/signup", uh.Signup)
-	g.POST("/signin", uh.Signin)
-	g.POST("/signout", uh.Signout)
-	g.PUT("/user", uh.UpdateUser)
-	g.GET("/user", uh.Me)
+	NewUserHandler(c.UserService).Router(g)
 }
 
-func success(ctx *gin.Context, data interface{}) {
+func Success(ctx *gin.Context, data interface{}) {
 	ctx.JSON(http.StatusOK, map[string]interface{}{
 		"code":   0,
 		"status": "success",
@@ -35,7 +28,7 @@ func success(ctx *gin.Context, data interface{}) {
 	})
 }
 
-func fail(ctx *gin.Context, errcode int, errmsg ...interface{}) {
+func Fail(ctx *gin.Context, errcode int, errmsg ...interface{}) {
 	ctx.JSON(http.StatusOK, map[string]interface{}{
 		"code":   errcode,
 		"status": "fail",

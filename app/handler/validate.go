@@ -32,7 +32,7 @@ func bindData(ctx *gin.Context, req interface{}) bool {
 				})
 			}
 			err := zerror.NewBadRequest("参数非法")
-			fail(ctx, err.Status(), gin.H{
+			Fail(ctx, err.Status(), gin.H{
 				"error":       err,
 				"invalidArgs": invalidArgs,
 			})
@@ -42,7 +42,7 @@ func bindData(ctx *gin.Context, req interface{}) bool {
 		}
 
 		fallBack := zerror.NewInternal()
-		fail(ctx, fallBack.Status(), gin.H{"error": fallBack})
+		Fail(ctx, fallBack.Status(), gin.H{"error": fallBack})
 		return false
 	}
 	return true

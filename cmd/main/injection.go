@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"wx/app/handler"
 	"wx/app/repository"
 	"wx/app/service"
@@ -10,24 +11,21 @@ import (
 	"gorm.io/gorm"
 )
 
-// will initialize a handler starting from data sources
-// which inject into repository layer
-// which inject into service layer
-// which inject into handler layer
 func inject(d *gorm.DB) (*gin.Engine, error) {
 	log.Println("Injecting data sources")
 
-	// repository layer
+	// repository
 	userRepository := repository.NewUserRepository(d)
 
-	// repository layer
+	// service
 	userService := service.NewUserService(userRepository)
 
-	// initialize gin.Engine
+	// handler
 	router := gin.Default()
 	handler.NewHandler(&handler.Config{
 		R:           router,
 		UserService: userService,
+		BaseUrlPath: os.Getenv("WX_API_URL_V1"),
 	})
 
 	return router, nil

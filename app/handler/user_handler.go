@@ -2,8 +2,8 @@ package handler
 
 import (
 	"log"
-	"net/http"
 	"wx/app/component"
+	"wx/app/dto"
 	"wx/app/model"
 	"wx/app/zerror"
 
@@ -11,45 +11,56 @@ import (
 	"github.com/spf13/cast"
 )
 
-type UserHandler struct {
+type userHandler struct {
 	UserService model.UserService
 }
 
-func (h *UserHandler) Me(ctx *gin.Context) {
-	user, exists := c.Get("user")
-	if !exists {
-		log.Printf("Unable to extract user from request context for unknown reason: %v\n", c)
-		err := zerror.NewInternal()
-		c.JSON(err.Status(), gin.H{
-			"error": err,
-		})
-		return
+// 注册路由
+func (h *userHandler) Router(router *gin.RouterGroup) {
+	//xrouter := router.Group("/x")
+	router.POST("/signup", h.signup)
+	router.POST("/signin", h.signin)
+	router.POST("/signout", h.signout)
+	router.PUT("/user", h.updateUser)
+	router.GET("/user", h.me)
+}
+
+func NewUserHandler(us model.UserService) *userHandler {
+	return &userHandler{
+		UserService: us,
 	}
-	id := user.(*model.User).ID
-	goctx := c.Request.Context()
-	u, err := h.UserService.Get(goctx, id)
-	if err != nil {
-		log.Printf("无法找到用户: %v\n%v", id, err)
-		e := zerror.NewNotFound("user", cast.ToString(id))
-		fail(ctx, e.Status(), gin.H{
+}
+
+func (h *userHandler) me(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		log.Printf("上下文中获取不到用户: %v\n", ctx)
+		e := zerror.NewInternal()
+		Fail(ctx, e.Status(), gin.H{
 			"error": e,
 		})
 		return
 	}
-	success(ctx, gin.H{
+
+	id := user.(*model.User).ID
+	goctx := ctx.Request.Context()
+	u, err := h.UserService.Get(goctx, id)
+	if err != nil {
+		log.Printf("无法找到用户: %v\n%v", id, err)
+		e := zerror.NewNotFound("user", cast.ToString(id))
+		Fail(ctx, e.Status(), gin.H{
+			"error": e,
+		})
+		return
+	}
+	Success(ctx, gin.H{
 		"user": u,
 	})
 }
 
-type signupReq struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,gte=6,lte=30"`
-}
-
-// Signup handler
-func (h *UserHandler) Signup(ctx *gin.Context) {
-	var req signupReq
-	if !bindData(ctx, &req) {
+func (h *userHandler) signup(ctx *gin.Context) {
+	var req dto.SignupReq
+	if ok := bindData(ctx, &req); !ok {
 		return
 	}
 
@@ -57,152 +68,99 @@ func (h *UserHandler) Signup(ctx *gin.Context) {
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	goctx := c.Request.Context()
+	goctx := ctx.Request.Context()
 	err := h.UserService.Signup(goctx, u)
 	if err != nil {
 		log.Printf("注册失败: %v\n", err.Error())
-		ctx.JSON(zerror.Status(err), gin.H{
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	// create token pair as strings
 	tokens, err := component.GenerateToken(u)
 	if err != nil {
-		log.Printf("Failed to create tokens for user: %v\n", err.Error())
-		ctx.JSON(zerror.Status(err), gin.H{
+		log.Printf("token生成失败: %v\n", err.Error())
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-
-	ctx.JSON(http.StatusCreated, gin.H{
+	Success(ctx, gin.H{
 		"tokens": tokens,
 	})
 }
 
-// Signin handler
-func (h *UserHandler) Signin(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"hello": "it's signin",
-	})
-}
-
-// Signout handler
-func (h *UserHandler) Signout(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"hello": "it's signout",
-	})
-}
-
-// Tokens handler
-func (h *UserHandler) Tokens(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"hello": "it's tokens",
-	})
-}
-
-// Image handler
-func (h *UserHandler) Image(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"hello": "it's image",
-	})
-}
-
-// DeleteImage handler
-func (h *UserHandler) DeleteImage(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"hello": "it's deleteImage",
-	})
-}
-
-type signupReq struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,gte=6,lte=30"`
-}
-
-func (h *UserHandler) Signin(c *gin.Context) {
-	var req signupReq
-	if ok := bindData(c, &req); !ok {
+func (h *userHandler) signin(ctx *gin.Context) {
+	var req dto.SigninReq
+	if ok := bindData(ctx, &req); !ok {
 		return
 	}
+
 	u := &model.User{
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	ctx := c.Request.Context()
-	err := h.UserService.Signup(ctx, u)
+	goctx := ctx.Request.Context()
+	err := h.UserService.Signup(goctx, u)
 	if err != nil {
-		log.Printf("Failed to sign up user: %v\n", err.Error())
-		c.JSON(apperrors.Status(err), gin.H{
+		log.Printf("登陆失败 user: %v\n", err.Error())
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	// create token pair as strings
-	tokens, err := h.TokenService.NewPairFromUser(ctx, u, "")
-
+	tokens, err := component.GenerateToken(u)
 	if err != nil {
-		log.Printf("Failed to create tokens for user: %v\n", err.Error())
-		c.JSON(zerror.Status(err), gin.H{
+		log.Printf("token生成失败 user: %v\n", err.Error())
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{
+	Success(ctx, gin.H{
 		"tokens": tokens,
 	})
 }
 
-//todo 如何设置失效？ 刷新token？ 	return s.TokenRepository.DeleteUserRefreshTokens(ctx, uid.String())
-
-func (h *UserHandler) Signout(c *gin.Context) {
-	user := c.MustGet("user")
-
-	ctx := c.Request.Context()
-	if err := h.TokenService.Signout(ctx, user.(*model.User).UID); err != nil {
-		c.JSON(zerror.Status(err), gin.H{
+func (h *userHandler) signout(ctx *gin.Context) {
+	authUser := ctx.MustGet("user").(*model.User)
+	//todo 如何设置失效？ 刷新token？ 	return s.TokenRepository.DeleteUserRefreshTokens(ctx, uid.String())
+	if _, err := component.GenerateToken(authUser); err != nil {
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "user signed out successfully!",
+	Success(ctx, gin.H{
+		"message": "退出成功",
 	})
 }
 
-type detailsReq struct {
-	Name   string `json:"name" binding:"omitempty,max=50"`
-	Avatar string `json:"avatar" binding:"required"`
-}
-
-func (h *UserHandler) UpdateUser(c *gin.Context) {
-	authUser := c.MustGet("user").(*model.User)
-	var req detailsReq
-	if ok := bindData(c, &req); !ok {
+func (h *userHandler) updateUser(ctx *gin.Context) {
+	var req dto.DetailsReq
+	if ok := bindData(ctx, &req); !ok {
 		return
 	}
+
+	authUser := ctx.MustGet("user").(*model.User)
 	u := &model.User{
 		ID:     authUser.ID,
 		Name:   req.Name,
 		Avatar: req.Avatar,
 	}
-
-	ctx := c.Request.Context()
-	err := h.UserService.UpdateDetail(ctx, u)
-
+	goctx := ctx.Request.Context()
+	err := h.UserService.UpdateDetail(goctx, u)
 	if err != nil {
-		log.Printf("Failed to update user: %v\n", err.Error())
-
-		c.JSON(zerror.Status(err), gin.H{
+		log.Printf("更新用户失败: %v\n", err.Error())
+		Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	Success(ctx, gin.H{
 		"user": u,
 	})
 }

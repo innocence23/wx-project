@@ -31,7 +31,7 @@ func (s *userService) Get(ctx context.Context, id int64) (*model.User, error) {
 func (s *userService) Signup(ctx context.Context, u *model.User) error {
 	pwd, err := hashPassword(u.Password)
 	if err != nil {
-		log.Printf("Unable to signup user for email: %v\n", u.Email)
+		log.Printf("密码加密错误 email: %v\n", u.Email)
 		return zerror.NewInternal()
 	}
 	u.Password = pwd
@@ -44,7 +44,7 @@ func (s *userService) Signup(ctx context.Context, u *model.User) error {
 func (s *userService) Signin(ctx context.Context, u *model.User) error {
 	user, err := s.UserRepository.FindByEmail(ctx, u.Email)
 	if err != nil {
-		log.Printf("Unable to signup user for email: %v\n", u.Email)
+		log.Printf("用户邮箱不存在 email: %v\n", u.Email)
 		return zerror.NewInternal()
 	}
 	match, err := comparePasswords(user.Password, u.Password)
@@ -52,7 +52,7 @@ func (s *userService) Signin(ctx context.Context, u *model.User) error {
 		return zerror.NewInternal()
 	}
 	if !match {
-		return zerror.NewAuthorization("Invalid email and password combination")
+		return zerror.NewAuthorization("邮箱或密码错误")
 	}
 	//*u = *user 此处可直接取用户详情
 	return nil
@@ -88,7 +88,7 @@ func comparePasswords(storedPassword string, suppliedPassword string) (bool, err
 	pwsalt := strings.Split(storedPassword, ".")
 	salt, err := hex.DecodeString(pwsalt[1])
 	if err != nil {
-		return false, fmt.Errorf("Unable to verify user password")
+		return false, fmt.Errorf("无效密码")
 	}
 	shash, err := scrypt.Key([]byte(suppliedPassword), salt, 32768, 8, 1, 32)
 	return hex.EncodeToString(shash) == pwsalt[0], nil
