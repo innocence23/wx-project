@@ -17,7 +17,12 @@ type userHandler struct {
 	UserService model.UserService
 }
 
-// 注册路由
+func NewUserHandler(s model.UserService) *userHandler {
+	return &userHandler{
+		UserService: s,
+	}
+}
+
 func (h *userHandler) Router(router *gin.RouterGroup) {
 	//xrouter := router.Group("/x")
 	router.POST("/signup", h.signup)
@@ -29,12 +34,6 @@ func (h *userHandler) Router(router *gin.RouterGroup) {
 	router.GET("/user/info", h.me)
 	router.PUT("/user/enable", h.enableUser)
 	router.PUT("/user/disable", h.disableUser)
-}
-
-func NewUserHandler(us model.UserService) *userHandler {
-	return &userHandler{
-		UserService: us,
-	}
 }
 
 func (h *userHandler) me(ctx *gin.Context) {
