@@ -1,5 +1,7 @@
 package dto
 
+import "wx/app/model"
+
 type RoleIdReq struct {
 	ID int64 `json:"id" form:"id" binding:"required" label:"角色ID"`
 }
@@ -21,5 +23,11 @@ type RoleSearchReq struct {
 	Name         string `json:"name"`
 	CreatedAtMin string `json:"created_at_min"`
 	CreatedAtMax string `json:"created_at_max"`
+	Pagination
+}
+
+type RoleListResp struct {
+	List  []model.Role `json:"list"`
+	Total int64        `json:"total"`
 	Pagination
 }

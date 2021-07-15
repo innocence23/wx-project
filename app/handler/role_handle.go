@@ -4,6 +4,7 @@ import (
 	"log"
 	"wx/app/dto"
 	"wx/app/handler/commonhandler"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zerror"
 
@@ -12,10 +13,10 @@ import (
 )
 
 type roleHandler struct {
-	RoleService model.RoleService
+	RoleService iface.RoleService
 }
 
-func NewRoleHandler(s model.RoleService) *roleHandler {
+func NewRoleHandler(s iface.RoleService) *roleHandler {
 	return &roleHandler{
 		RoleService: s,
 	}

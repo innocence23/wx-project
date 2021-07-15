@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"wx/app/dto"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zconst"
 	"wx/app/zerror"
@@ -16,7 +17,7 @@ type roleRepository struct {
 	DB *gorm.DB
 }
 
-func NewRoleRepository(db *gorm.DB) model.RoleRepository {
+func NewRoleRepository(db *gorm.DB) iface.RoleRepository {
 	return &roleRepository{
 		DB: db,
 	}
@@ -31,7 +32,7 @@ func (r *roleRepository) FindByID(ctx context.Context, id int64) (*model.Role, e
 	return role, nil
 }
 
-func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchReq) ([]model.Role, error) {
+func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchReq) (dto.RoleListResp, error) {
 	roles := make([]model.Role, 0)
 	x := r.DB
 	if len(where.Name) > 0 {
@@ -41,12 +42,25 @@ func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchRe
 		x = x.Where("created_at >= ?", where.CreatedAtMin)
 		x = x.Where("created_at <= ?", where.CreatedAtMax)
 	}
+	var total int64 = 0
+	if err := x.Count(&total).Error; err != nil {
+		return dto.RoleListResp{}, zerror.NewInternal()
+	}
 
 	if err := x.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
 		log.Printf("数据查询失败， where: %#v. 失败原因: %v\n", where, err)
-		return nil, zerror.NewInternal()
+		return dto.RoleListResp{}, zerror.NewInternal()
 	}
-	return roles, nil
+	result := dto.RoleListResp{
+		List:  roles,
+		Total: total,
+		Pagination: dto.Pagination{
+
+			Page:     where.Page,
+			PageSize: where.PageSize,
+		},
+	}
+	return result, nil
 }
 
 func (r *roleRepository) Create(ctx context.Context, m *model.Role) (*model.Role, error) {

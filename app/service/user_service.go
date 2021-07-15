@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zconst"
 	"wx/app/zerror"
@@ -15,10 +16,10 @@ import (
 )
 
 type userService struct {
-	UserRepository model.UserRepository
+	UserRepository iface.UserRepository
 }
 
-func NewUserService(ur model.UserRepository) model.UserService {
+func NewUserService(ur iface.UserRepository) iface.UserService {
 	return &userService{
 		UserRepository: ur,
 	}

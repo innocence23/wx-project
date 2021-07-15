@@ -2,7 +2,7 @@ package handler
 
 import (
 	"wx/app/handler/middleware"
-	"wx/app/model"
+	"wx/app/iface"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,8 +10,8 @@ import (
 type Config struct {
 	R           *gin.Engine
 	BaseUrlPath string
-	UserService model.UserService
-	RoleService model.RoleService
+	UserService iface.UserService
+	RoleService iface.RoleService
 }
 
 func NewHandler(c *Config) {

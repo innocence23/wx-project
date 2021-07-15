@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"log"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zconst"
 	"wx/app/zerror"
@@ -15,7 +16,7 @@ type userRepository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) model.UserRepository {
+func NewUserRepository(db *gorm.DB) iface.UserRepository {
 	return &userRepository{
 		DB: db,
 	}

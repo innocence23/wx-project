@@ -6,6 +6,7 @@ import (
 	"wx/app/dto"
 	"wx/app/handler/commonhandler"
 	"wx/app/handler/middleware"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zerror"
 
@@ -14,10 +15,10 @@ import (
 )
 
 type userHandler struct {
-	UserService model.UserService
+	UserService iface.UserService
 }
 
-func NewUserHandler(s model.UserService) *userHandler {
+func NewUserHandler(s iface.UserService) *userHandler {
 	return &userHandler{
 		UserService: s,
 	}

@@ -3,15 +3,16 @@ package service
 import (
 	"context"
 	"wx/app/dto"
+	"wx/app/iface"
 	"wx/app/model"
 	"wx/app/zconst"
 )
 
 type roleService struct {
-	RoleRepository model.RoleRepository
+	RoleRepository iface.RoleRepository
 }
 
-func NewRoleService(ur model.RoleRepository) model.RoleService {
+func NewRoleService(ur iface.RoleRepository) iface.RoleService {
 	return &roleService{
 		RoleRepository: ur,
 	}
@@ -21,7 +22,7 @@ func (s *roleService) Get(ctx context.Context, id int64) (*model.Role, error) {
 	return s.RoleRepository.FindByID(ctx, id)
 }
 
-func (s *roleService) List(ctx context.Context, where dto.RoleSearchReq) ([]model.Role, error) {
+func (s *roleService) List(ctx context.Context, where dto.RoleSearchReq) (dto.RoleListResp, error) {
 	return s.RoleRepository.FindByWhere(ctx, where)
 }
 
