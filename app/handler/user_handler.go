@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"wx/app/component"
 	"wx/app/model"
 	"wx/app/zerror"
 
@@ -11,31 +12,23 @@ import (
 )
 
 type UserHandler struct {
-	UserService  model.UserService
-	TokenService model.TokenService
+	UserService model.UserService
 }
 
-// Me handler calls services for getting
-func (h *UserHandler) Me(c *gin.Context) {
-
-	var id int64 = 1
-
-	u, err := h.UserService.Get(c, id)
-
+func (h *UserHandler) Me(ctx *gin.Context) {
+	var id int64 = 10
+	u, err := h.UserService.Get(ctx, id)
 	if err != nil {
-		log.Printf("Unable to find user: %v\n%v", id, err)
+		log.Printf("无法找到用户: %v\n%v", id, err)
 		e := zerror.NewNotFound("user", cast.ToString(id))
-
-		c.JSON(e.Status(), gin.H{
+		fail(ctx, e.Status(), gin.H{
 			"error": e,
 		})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
+	success(ctx, gin.H{
 		"user": u,
 	})
-
 }
 
 type signupReq struct {
@@ -44,82 +37,78 @@ type signupReq struct {
 }
 
 // Signup handler
-func (h *UserHandler) Signup(c *gin.Context) {
+func (h *UserHandler) Signup(ctx *gin.Context) {
 	var req signupReq
-	if err := c.Bind(&req); err != nil {
-		log.Printf("Failed to sign up user: %v\n", err.Error())
-		c.JSON(zerror.Status(err), gin.H{
-			"error": err,
-		})
+	if !bindData(ctx, &req) {
+		return
 	}
 
 	u := &model.User{
 		Email:    req.Email,
 		Password: req.Password,
 	}
-	err := h.UserService.Signup(c, u)
+	err := h.UserService.Signup(ctx, u)
 	if err != nil {
-		log.Printf("Failed to sign up user: %v\n", err.Error())
-		c.JSON(zerror.Status(err), gin.H{
+		log.Printf("注册失败: %v\n", err.Error())
+		ctx.JSON(zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
 	// create token pair as strings
-	tokens, err := h.TokenService.NewPairFromUser(c, u, "")
-
+	tokens, err := component.GenerateToken(u)
 	if err != nil {
 		log.Printf("Failed to create tokens for user: %v\n", err.Error())
-		c.JSON(zerror.Status(err), gin.H{
+		ctx.JSON(zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	ctx.JSON(http.StatusCreated, gin.H{
 		"tokens": tokens,
 	})
 }
 
 // Signin handler
-func (h *UserHandler) Signin(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) Signin(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's signin",
 	})
 }
 
 // Signout handler
-func (h *UserHandler) Signout(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) Signout(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's signout",
 	})
 }
 
 // Tokens handler
-func (h *UserHandler) Tokens(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) Tokens(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's tokens",
 	})
 }
 
 // Image handler
-func (h *UserHandler) Image(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) Image(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's image",
 	})
 }
 
 // DeleteImage handler
-func (h *UserHandler) DeleteImage(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) DeleteImage(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's deleteImage",
 	})
 }
 
 // Details handler
-func (h *UserHandler) Details(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
+func (h *UserHandler) Details(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
 		"hello": "it's details",
 	})
 }

@@ -29,7 +29,7 @@ services:
       - mysql
     volumes:
       - ./:/go/src/app
-    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+    command: reflex -r "\.go$$" -s -- sh -c "go run ./cmd/main/"
   mysql:
     image: mysql:5.7
     environment:

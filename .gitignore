@@ -1,4 +1,4 @@
 .vscode
-fsw.yml
 logs
 db.sql
+bin/

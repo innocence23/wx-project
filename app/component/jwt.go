@@ -8,7 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var jwtSecret = []byte(os.Getenv("JwtSecret"))
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type IDTokenCustomClaims struct {
 	User *model.User `json:"user"`

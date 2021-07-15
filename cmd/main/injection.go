@@ -23,14 +23,11 @@ func inject(d *gorm.DB) (*gin.Engine, error) {
 	// repository layer
 	userService := service.NewUserService(userRepository)
 
-	tokenService := service.NewTokenService()
-
 	// initialize gin.Engine
 	router := gin.Default()
 	handler.NewHandler(&handler.Config{
-		R:            router,
-		UserService:  userService,
-		TokenService: tokenService,
+		R:           router,
+		UserService: userService,
 	})
 
 	return router, nil

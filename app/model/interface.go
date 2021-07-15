@@ -15,7 +15,3 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id int64) (*User, error)
 	Create(ctx context.Context, u *User) error
 }
-
-type TokenService interface {
-	NewPairFromUser(ctx context.Context, u *User, prevTokenID string) (*TokenPair, error)
-}

@@ -83,7 +83,7 @@ func NewAuthorization(reason string) *Error {
 func NewBadRequest(reason string) *Error {
 	return &Error{
 		Type:    BadRequest,
-		Message: fmt.Sprintf("Bad request. Reason: %v", reason),
+		Message: reason,
 	}
 }
 
@@ -99,7 +99,7 @@ func NewConflict(name string, value string) *Error {
 func NewInternal() *Error {
 	return &Error{
 		Type:    Internal,
-		Message: fmt.Sprintf("Internal server error."),
+		Message: fmt.Sprintf("服务内部错误"),
 	}
 }
 

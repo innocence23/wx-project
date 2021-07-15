@@ -10,7 +10,7 @@ RUN go get github.com/cespare/reflex
 
 COPY . .
 
-RUN go build -o ./run .
+RUN go build -o ./run ./cmd/main/
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
