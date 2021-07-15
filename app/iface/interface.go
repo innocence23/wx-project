@@ -39,3 +39,20 @@ type RoleRepository interface {
 	Update(ctx context.Context, m *model.Role) error
 	UpdateStatus(ctx context.Context, id int64, status int) error
 }
+
+type PermissionService interface {
+	Get(ctx context.Context, id int64) (*model.Permission, error)
+	List(ctx context.Context, where dto.PermissionSearchReq) (dto.PermissionListResp, error)
+	Create(ctx context.Context, m *model.Permission) (*model.Permission, error)
+	Update(ctx context.Context, m *model.Permission) error
+	Disable(ctx context.Context, id int64) error
+	Enable(ctx context.Context, id int64) error
+}
+
+type PermissionRepository interface {
+	FindByID(ctx context.Context, id int64) (*model.Permission, error)
+	FindByWhere(ctx context.Context, where dto.PermissionSearchReq) (dto.PermissionListResp, error)
+	Create(ctx context.Context, m *model.Permission) (*model.Permission, error)
+	Update(ctx context.Context, m *model.Permission) error
+	UpdateStatus(ctx context.Context, id int64, status int) error
+}

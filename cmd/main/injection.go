@@ -17,18 +17,21 @@ func inject(d *gorm.DB) (*gin.Engine, error) {
 	// repository
 	userRepository := repository.NewUserRepository(d)
 	roleRepository := repository.NewRoleRepository(d)
+	permissionRepository := repository.NewPermissionRepository(d)
 
 	// service
 	userService := service.NewUserService(userRepository)
 	roleService := service.NewRoleService(roleRepository)
+	permissionService := service.NewPermissionService(permissionRepository)
 
 	// handler
 	router := gin.Default()
 	handler.NewHandler(&handler.Config{
-		R:           router,
-		BaseUrlPath: os.Getenv("WX_API_URL_V1"),
-		UserService: userService,
-		RoleService: roleService,
+		R:                 router,
+		BaseUrlPath:       os.Getenv("WX_API_URL_V1"),
+		UserService:       userService,
+		RoleService:       roleService,
+		PermissionService: permissionService,
 	})
 
 	return router, nil

@@ -12,9 +12,9 @@ type roleService struct {
 	RoleRepository iface.RoleRepository
 }
 
-func NewRoleService(ur iface.RoleRepository) iface.RoleService {
+func NewRoleService(r iface.RoleRepository) iface.RoleService {
 	return &roleService{
-		RoleRepository: ur,
+		RoleRepository: r,
 	}
 }
 

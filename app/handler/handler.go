@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	R           *gin.Engine
-	BaseUrlPath string
-	UserService iface.UserService
-	RoleService iface.RoleService
+	R                 *gin.Engine
+	BaseUrlPath       string
+	UserService       iface.UserService
+	RoleService       iface.RoleService
+	PermissionService iface.PermissionService
 }
 
 func NewHandler(c *Config) {
@@ -21,4 +22,5 @@ func NewHandler(c *Config) {
 
 	g.Use(middleware.JWTAuthMiddleware())
 	NewRoleHandler(c.RoleService).Router(g)
+	NewPermissionHandler(c.PermissionService).Router(g)
 }

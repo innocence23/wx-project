@@ -19,9 +19,9 @@ type userService struct {
 	UserRepository iface.UserRepository
 }
 
-func NewUserService(ur iface.UserRepository) iface.UserService {
+func NewUserService(r iface.UserRepository) iface.UserService {
 	return &userService{
-		UserRepository: ur,
+		UserRepository: r,
 	}
 }
 
