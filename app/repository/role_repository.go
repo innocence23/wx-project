@@ -42,12 +42,13 @@ func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchRe
 		x = x.Where("created_at >= ?", where.CreatedAtMin)
 		x = x.Where("created_at <= ?", where.CreatedAtMax)
 	}
+	y := x
 	var total int64 = 0
 	if err := x.Count(&total).Error; err != nil {
 		return dto.RoleListResp{}, zerror.NewInternal()
 	}
 
-	if err := x.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
+	if err := y.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
 		log.Printf("数据查询失败， where: %#v. 失败原因: %v\n", where, err)
 		return dto.RoleListResp{}, zerror.NewInternal()
 	}
