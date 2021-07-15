@@ -14,3 +14,10 @@ type DetailsReq struct {
 	Name   string `json:"name" binding:"omitempty,max=50"`
 	Avatar string `json:"avatar" binding:"required"`
 }
+
+type UserJWT struct {
+	ID     int64
+	Name   string
+	Email  string
+	Avatar string
+}

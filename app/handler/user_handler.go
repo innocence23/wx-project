@@ -46,11 +46,11 @@ func (h *userHandler) me(ctx *gin.Context) {
 		return
 	}
 
-	id := user.(*model.User).ID
+	id := user.(*dto.UserJWT).ID
 	goctx := ctx.Request.Context()
 	u, err := h.UserService.Get(goctx, id)
 	if err != nil {
-		log.Printf("无法找到用户: %v\n%v", id, err)
+		log.Printf("无法找到用户: %v %#v\n%v", id, user, err)
 		e := zerror.NewNotFound("user", cast.ToString(id))
 		commonhandler.Fail(ctx, e.Status(), gin.H{
 			"error": e,
@@ -82,7 +82,13 @@ func (h *userHandler) signup(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := component.GenerateToken(u)
+	uj := &dto.UserJWT{
+		ID:     u.ID,
+		Name:   u.Name,
+		Email:  u.Email,
+		Avatar: u.Avatar,
+	}
+	tokens, err := component.GenerateToken(uj)
 	if err != nil {
 		log.Printf("token生成失败: %v\n", err.Error())
 		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
@@ -106,7 +112,7 @@ func (h *userHandler) signin(ctx *gin.Context) {
 		Password: req.Password,
 	}
 	goctx := ctx.Request.Context()
-	err := h.UserService.Signup(goctx, u)
+	err := h.UserService.Signin(goctx, u)
 	if err != nil {
 		log.Printf("登陆失败 user: %v\n", err.Error())
 		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
@@ -115,7 +121,13 @@ func (h *userHandler) signin(ctx *gin.Context) {
 		return
 	}
 
-	tokens, err := component.GenerateToken(u)
+	uj := &dto.UserJWT{
+		ID:     u.ID,
+		Name:   u.Name,
+		Email:  u.Email,
+		Avatar: u.Avatar,
+	}
+	tokens, err := component.GenerateToken(uj)
 	if err != nil {
 		log.Printf("token生成失败 user: %v\n", err.Error())
 		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
@@ -128,15 +140,10 @@ func (h *userHandler) signin(ctx *gin.Context) {
 	})
 }
 
+//todo 如何让客户端的token失效
 func (h *userHandler) signout(ctx *gin.Context) {
-	authUser := ctx.MustGet("user").(*model.User)
-	//todo 如何设置失效？ 刷新token？ 	return s.TokenRepository.DeleteUserRefreshTokens(ctx, uid.String())
-	if _, err := component.GenerateToken(authUser); err != nil {
-		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
-			"error": err,
-		})
-		return
-	}
+	authUser := ctx.MustGet("user").(*dto.UserJWT)
+	_ = authUser
 	commonhandler.Success(ctx, gin.H{
 		"message": "退出成功",
 	})
@@ -148,7 +155,7 @@ func (h *userHandler) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	authUser := ctx.MustGet("user").(*model.User)
+	authUser := ctx.MustGet("user").(*dto.UserJWT)
 	u := &model.User{
 		ID:     authUser.ID,
 		Name:   req.Name,
@@ -165,6 +172,6 @@ func (h *userHandler) updateUser(ctx *gin.Context) {
 	}
 
 	commonhandler.Success(ctx, gin.H{
-		"user": u,
+		"message": "更新成功",
 	})
 }

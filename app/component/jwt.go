@@ -3,22 +3,24 @@ package component
 import (
 	"os"
 	"time"
-	"wx/app/model"
+	"wx/app/dto"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/cast"
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+var jwtExpSec = os.Getenv("JWT_EXP_SEC")
 
 type IDTokenCustomClaims struct {
-	User *model.User `json:"user"`
+	User *dto.UserJWT `json:"user"`
 	jwt.StandardClaims
 }
 
 // 产生token的函数
-func GenerateToken(u *model.User) (string, error) {
+func GenerateToken(u *dto.UserJWT) (string, error) {
 	unixTime := time.Now().Unix()
-	tokenExp := unixTime + 3600*12 // 12 hour from current time
+	tokenExp := unixTime + cast.ToInt64(jwtExpSec)
 
 	claims := IDTokenCustomClaims{
 		User: u,

@@ -54,7 +54,7 @@ func (s *userService) Signin(ctx context.Context, u *model.User) error {
 	if !match {
 		return zerror.NewAuthorization("邮箱或密码错误")
 	}
-	//*u = *user 此处可直接取用户详情
+	*u = *user //此处可直接取用户详情
 	return nil
 }
 
