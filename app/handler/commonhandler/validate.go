@@ -2,33 +2,51 @@ package commonhandler
 
 import (
 	"fmt"
+	"reflect"
 	"wx/app/zerror"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/go-playground/validator.v8"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/locales/zh"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	zh2 "github.com/go-playground/validator/v10/translations/zh"
 )
 
-// used to help extract validation errors
 type invalidArgument struct {
 	Field string `json:"field"`
 	Value string `json:"value"`
 	Tag   string `json:"tag"`
 	Param string `json:"param"`
+	Msg   string `json:"message"`
+}
+
+var Trans ut.Translator
+
+func init() {
+	uni := ut.New(zh.New())
+	Trans, _ = uni.GetTranslator("zh")
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = zh2.RegisterDefaultTranslations(v, Trans) //注册翻译器
+		//注册一个函数，获取struct tag里自定义的label作为字段名
+		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+			name := fld.Tag.Get("label")
+			return name
+		})
+	}
 }
 
 func BindData(ctx *gin.Context, req interface{}) bool {
 	if err := ctx.Bind(req); err != nil {
-		fmt.Println(err)
-		fmt.Printf("%#v, %T\n", err, err)
-		fmt.Println("-----")
 		if errs, ok := err.(validator.ValidationErrors); ok {
 			var invalidArgs []invalidArgument
 			for _, err := range errs {
 				invalidArgs = append(invalidArgs, invalidArgument{
-					err.Field,
-					err.Value.(string),
-					err.Tag,
-					err.Param,
+					err.Field(),
+					err.Value().(string),
+					err.Tag(),
+					err.Param(),
+					err.Translate(Trans),
 				})
 			}
 			err := zerror.NewBadRequest("参数非法")

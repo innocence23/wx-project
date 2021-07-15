@@ -1,8 +1,8 @@
 package dto
 
 type SignupReq struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,gte=6,lte=30"`
+	Email    string `json:"email" binding:"required,email" label:"邮箱"`
+	Password string `json:"password" binding:"required,gte=6,lte=30" label:"密码"`
 }
 
 type SigninReq struct {
