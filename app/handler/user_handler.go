@@ -4,6 +4,8 @@ import (
 	"log"
 	"wx/app/component"
 	"wx/app/dto"
+	"wx/app/handler/commonhandler"
+	"wx/app/handler/middleware"
 	"wx/app/model"
 	"wx/app/zerror"
 
@@ -20,9 +22,11 @@ func (h *userHandler) Router(router *gin.RouterGroup) {
 	//xrouter := router.Group("/x")
 	router.POST("/signup", h.signup)
 	router.POST("/signin", h.signin)
+
+	router.Use(middleware.JWTAuthMiddleware())
 	router.POST("/signout", h.signout)
 	router.PUT("/user", h.updateUser)
-	router.GET("/user", h.me)
+	router.GET("/me", h.me)
 }
 
 func NewUserHandler(us model.UserService) *userHandler {
@@ -36,7 +40,7 @@ func (h *userHandler) me(ctx *gin.Context) {
 	if !exists {
 		log.Printf("上下文中获取不到用户: %v\n", ctx)
 		e := zerror.NewInternal()
-		Fail(ctx, e.Status(), gin.H{
+		commonhandler.Fail(ctx, e.Status(), gin.H{
 			"error": e,
 		})
 		return
@@ -48,19 +52,19 @@ func (h *userHandler) me(ctx *gin.Context) {
 	if err != nil {
 		log.Printf("无法找到用户: %v\n%v", id, err)
 		e := zerror.NewNotFound("user", cast.ToString(id))
-		Fail(ctx, e.Status(), gin.H{
+		commonhandler.Fail(ctx, e.Status(), gin.H{
 			"error": e,
 		})
 		return
 	}
-	Success(ctx, gin.H{
+	commonhandler.Success(ctx, gin.H{
 		"user": u,
 	})
 }
 
 func (h *userHandler) signup(ctx *gin.Context) {
 	var req dto.SignupReq
-	if ok := bindData(ctx, &req); !ok {
+	if ok := commonhandler.BindData(ctx, &req); !ok {
 		return
 	}
 
@@ -72,7 +76,7 @@ func (h *userHandler) signup(ctx *gin.Context) {
 	err := h.UserService.Signup(goctx, u)
 	if err != nil {
 		log.Printf("注册失败: %v\n", err.Error())
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
@@ -81,19 +85,19 @@ func (h *userHandler) signup(ctx *gin.Context) {
 	tokens, err := component.GenerateToken(u)
 	if err != nil {
 		log.Printf("token生成失败: %v\n", err.Error())
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-	Success(ctx, gin.H{
+	commonhandler.Success(ctx, gin.H{
 		"tokens": tokens,
 	})
 }
 
 func (h *userHandler) signin(ctx *gin.Context) {
 	var req dto.SigninReq
-	if ok := bindData(ctx, &req); !ok {
+	if ok := commonhandler.BindData(ctx, &req); !ok {
 		return
 	}
 
@@ -105,7 +109,7 @@ func (h *userHandler) signin(ctx *gin.Context) {
 	err := h.UserService.Signup(goctx, u)
 	if err != nil {
 		log.Printf("登陆失败 user: %v\n", err.Error())
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
@@ -114,12 +118,12 @@ func (h *userHandler) signin(ctx *gin.Context) {
 	tokens, err := component.GenerateToken(u)
 	if err != nil {
 		log.Printf("token生成失败 user: %v\n", err.Error())
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-	Success(ctx, gin.H{
+	commonhandler.Success(ctx, gin.H{
 		"tokens": tokens,
 	})
 }
@@ -128,19 +132,19 @@ func (h *userHandler) signout(ctx *gin.Context) {
 	authUser := ctx.MustGet("user").(*model.User)
 	//todo 如何设置失效？ 刷新token？ 	return s.TokenRepository.DeleteUserRefreshTokens(ctx, uid.String())
 	if _, err := component.GenerateToken(authUser); err != nil {
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
-	Success(ctx, gin.H{
+	commonhandler.Success(ctx, gin.H{
 		"message": "退出成功",
 	})
 }
 
 func (h *userHandler) updateUser(ctx *gin.Context) {
 	var req dto.DetailsReq
-	if ok := bindData(ctx, &req); !ok {
+	if ok := commonhandler.BindData(ctx, &req); !ok {
 		return
 	}
 
@@ -154,13 +158,13 @@ func (h *userHandler) updateUser(ctx *gin.Context) {
 	err := h.UserService.UpdateDetail(goctx, u)
 	if err != nil {
 		log.Printf("更新用户失败: %v\n", err.Error())
-		Fail(ctx, zerror.Status(err), gin.H{
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	Success(ctx, gin.H{
+	commonhandler.Success(ctx, gin.H{
 		"user": u,
 	})
 }

@@ -1,4 +1,4 @@
-package handler
+package commonhandler
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type invalidArgument struct {
 	Param string `json:"param"`
 }
 
-func bindData(ctx *gin.Context, req interface{}) bool {
+func BindData(ctx *gin.Context, req interface{}) bool {
 	if err := ctx.Bind(req); err != nil {
 		fmt.Println(err)
 		fmt.Printf("%#v, %T\n", err, err)
