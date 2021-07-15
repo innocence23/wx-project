@@ -33,14 +33,16 @@ func (r *roleRepository) FindByID(ctx context.Context, id int64) (*model.Role, e
 
 func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchReq) ([]model.Role, error) {
 	roles := make([]model.Role, 0)
+	x := r.DB
 	if len(where.Name) > 0 {
-		r.DB.Where("name = ?", where.Name)
+		x = x.Where("name like ?", "%"+where.Name+"%")
 	}
-	if len(where.CreatedAt) > 0 {
-		r.DB.Where("create_at = ?", where.Name)
+	if len(where.CreatedAtMin) > 0 {
+		x = x.Where("created_at >= ?", where.CreatedAtMin)
+		x = x.Where("created_at <= ?", where.CreatedAtMax)
 	}
 
-	if err := r.DB.Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
+	if err := x.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
 		log.Printf("数据查询失败， where: %#v. 失败原因: %v\n", where, err)
 		return nil, zerror.NewInternal()
 	}
@@ -61,18 +63,26 @@ func (r *roleRepository) Update(ctx context.Context, m *model.Role) error {
 		Description: m.Description,
 		MenuIds:     m.MenuIds,
 	}
-	if result := r.DB.Model(m).Updates(data); result.Error != nil || result.RowsAffected == 0 {
+	result := r.DB.Model(m).Updates(data)
+	if result.Error != nil {
 		log.Printf("数据更新失败: %v. 失败原因: %v，影响行数:%d\n", m, result.Error, result.RowsAffected)
 		return zerror.NewInternal()
+	}
+	if result.RowsAffected == 0 {
+		return zerror.NewNotFound("id", cast.ToString(data.Id))
 	}
 	return nil
 }
 
 func (r *roleRepository) UpdateStatus(ctx context.Context, id int64, status int) error {
 	m := &model.Role{Id: id}
-	if result := r.DB.Model(m).Update("status", status); result.Error != nil || result.RowsAffected == 0 {
+	result := r.DB.Model(m).Update("status", status)
+	if result.Error != nil {
 		log.Printf("状态更新失败: ID:%v;Status%v. 失败原因: %v，影响行数:%d\n", id, status, result.Error, result.RowsAffected)
 		return zerror.NewInternal()
+	}
+	if result.RowsAffected == 0 {
+		return zerror.NewNotFound("id", cast.ToString(id))
 	}
 	return nil
 }

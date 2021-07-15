@@ -14,11 +14,11 @@ import (
 )
 
 type invalidArgument struct {
-	Field string `json:"field"`
-	Value string `json:"value"`
-	Tag   string `json:"tag"`
-	Param string `json:"param"`
-	Msg   string `json:"message"`
+	Field string      `json:"field"`
+	Value interface{} `json:"value"`
+	Tag   string      `json:"tag"`
+	Param string      `json:"param"`
+	Msg   string      `json:"message"`
 }
 
 var Trans ut.Translator
@@ -37,13 +37,15 @@ func init() {
 }
 
 func BindData(ctx *gin.Context, req interface{}) bool {
+
+	fmt.Printf("%#v %T\n", req, req)
 	if err := ctx.Bind(req); err != nil {
 		if errs, ok := err.(validator.ValidationErrors); ok {
 			var invalidArgs []invalidArgument
 			for _, err := range errs {
 				invalidArgs = append(invalidArgs, invalidArgument{
 					err.Field(),
-					err.Value().(string),
+					err.Value(),
 					err.Tag(),
 					err.Param(),
 					err.Translate(Trans),
@@ -54,11 +56,8 @@ func BindData(ctx *gin.Context, req interface{}) bool {
 				"error":       err,
 				"invalidArgs": invalidArgs,
 			})
-			fmt.Println(err)
-
 			return false
 		}
-
 		fallBack := zerror.NewInternal()
 		Fail(ctx, fallBack.Status(), gin.H{"error": fallBack})
 		return false

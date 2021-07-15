@@ -24,9 +24,9 @@ func NewRoleHandler(s model.RoleService) *roleHandler {
 func (h *roleHandler) Router(router *gin.RouterGroup) {
 	grouter := router.Group("/role")
 	grouter.GET("/info", h.show)
-	grouter.GET("/list", h.list)
+	grouter.POST("/list", h.list) //参数多，改为post方便
 	grouter.POST("", h.create)
-	grouter.PUT("/detail", h.update)
+	grouter.PUT("", h.update)
 	grouter.PUT("/enable", h.enable)
 	grouter.PUT("/disable", h.disable)
 }

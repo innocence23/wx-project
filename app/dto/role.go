@@ -1,7 +1,7 @@
 package dto
 
 type RoleIdReq struct {
-	ID int64 `json:"id" binding:"required"`
+	ID int64 `json:"id" form:"id" binding:"required" label:"角色ID"`
 }
 
 type RoleCreateReq struct {
@@ -18,7 +18,8 @@ type RoleUpdateReq struct {
 }
 
 type RoleSearchReq struct {
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+	Name         string `json:"name"`
+	CreatedAtMin string `json:"created_at_min"`
+	CreatedAtMax string `json:"created_at_max"`
 	Pagination
 }
