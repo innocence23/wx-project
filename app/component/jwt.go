@@ -21,7 +21,6 @@ type IDTokenCustomClaims struct {
 func GenerateToken(u *dto.UserJWT) (string, error) {
 	unixTime := time.Now().Unix()
 	tokenExp := unixTime + cast.ToInt64(jwtExpSec)
-
 	claims := IDTokenCustomClaims{
 		User: u,
 		StandardClaims: jwt.StandardClaims{
