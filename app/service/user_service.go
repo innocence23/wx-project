@@ -8,37 +8,66 @@ import (
 	"log"
 	"strings"
 	"wx/app/model"
+	"wx/app/zconst"
 	"wx/app/zerror"
 
 	"golang.org/x/crypto/scrypt"
 )
 
-type UserService struct {
+type userService struct {
 	UserRepository model.UserRepository
 }
 
 func NewUserService(ur model.UserRepository) model.UserService {
-	return &UserService{
+	return &userService{
 		UserRepository: ur,
 	}
 }
 
-func (s *UserService) Get(ctx context.Context, id int64) (*model.User, error) {
-	u, err := s.UserRepository.FindByID(ctx, id)
-	return u, err
+func (s *userService) Get(ctx context.Context, id int64) (*model.User, error) {
+	return s.UserRepository.FindByID(ctx, id)
 }
 
-func (s *UserService) Signup(ctx context.Context, u *model.User) error {
-	pw, err := hashPassword(u.Password)
+func (s *userService) Signup(ctx context.Context, u *model.User) error {
+	pwd, err := hashPassword(u.Password)
 	if err != nil {
 		log.Printf("Unable to signup user for email: %v\n", u.Email)
 		return zerror.NewInternal()
 	}
-	u.Password = pw
+	u.Password = pwd
 	if err := s.UserRepository.Create(ctx, u); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (s *userService) Signin(ctx context.Context, u *model.User) error {
+	user, err := s.UserRepository.FindByEmail(ctx, u.Email)
+	if err != nil {
+		log.Printf("Unable to signup user for email: %v\n", u.Email)
+		return zerror.NewInternal()
+	}
+	match, err := comparePasswords(user.Password, u.Password)
+	if err != nil {
+		return zerror.NewInternal()
+	}
+	if !match {
+		return zerror.NewAuthorization("Invalid email and password combination")
+	}
+	//*u = *user 此处可直接取用户详情
+	return nil
+}
+
+func (s *userService) UpdateDetail(ctx context.Context, u *model.User) error {
+	return s.UserRepository.Update(ctx, u)
+}
+
+func (s *userService) DisableUser(ctx context.Context, id int64) error {
+	return s.UserRepository.UpdateStatus(ctx, id, zconst.DisableStatus)
+}
+
+func (s *userService) EnableUser(ctx context.Context, id int64) error {
+	return s.UserRepository.UpdateStatus(ctx, id, zconst.NormalStatus)
 }
 
 func hashPassword(password string) (string, error) {
