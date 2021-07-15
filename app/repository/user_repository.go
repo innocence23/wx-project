@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"wx/app/model"
+	"wx/app/zconst"
 	"wx/app/zerror"
 
 	"github.com/spf13/cast"
@@ -22,7 +23,7 @@ func NewUserRepository(db *gorm.DB) model.UserRepository {
 
 func (r *userRepository) FindByID(ctx context.Context, id int64) (*model.User, error) {
 	user := &model.User{}
-	if result := r.DB.Find(user, id); result.Error != nil || result.RowsAffected == 0 {
+	if result := r.DB.Find(user, id); result.Error != nil || result.RowsAffected == 0 || user.Status == zconst.DisableStatus {
 		log.Printf("查询数据失败， ID: %v. 失败原因: %v，影响行数:%d\n", id, result.Error, result.RowsAffected)
 		return user, zerror.NewNotFound("uid", cast.ToString(id))
 	}
@@ -31,7 +32,7 @@ func (r *userRepository) FindByID(ctx context.Context, id int64) (*model.User, e
 
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	user := &model.User{}
-	if result := r.DB.Where("email = ?", email).First(user); result.Error != nil || result.RowsAffected == 0 {
+	if result := r.DB.Where("email = ?", email).First(user); result.Error != nil || result.RowsAffected == 0 || user.Status == zconst.DisableStatus {
 		log.Printf("查询数据失败， Email: %v. 失败原因: %v，影响行数:%d\n", email, result.Error, result.RowsAffected)
 		return user, zerror.NewNotFound("email", email)
 	}

@@ -26,7 +26,9 @@ func (h *userHandler) Router(router *gin.RouterGroup) {
 	router.Use(middleware.JWTAuthMiddleware())
 	router.POST("/signout", h.signout)
 	router.PUT("/user", h.updateUser)
-	router.GET("/me", h.me)
+	router.GET("/user/info", h.me)
+	router.PUT("/user/enable", h.enableUser)
+	router.PUT("/user/disable", h.disableUser)
 }
 
 func NewUserHandler(us model.UserService) *userHandler {
@@ -172,6 +174,38 @@ func (h *userHandler) updateUser(ctx *gin.Context) {
 	}
 
 	commonhandler.Success(ctx, gin.H{
-		"message": "更新成功",
+		"message": "操作成功",
+	})
+}
+
+func (h *userHandler) disableUser(ctx *gin.Context) {
+	authUser := ctx.MustGet("user").(*dto.UserJWT)
+	goctx := ctx.Request.Context()
+	err := h.UserService.DisableUser(goctx, authUser.ID)
+	if err != nil {
+		log.Printf("用户禁用失败: %v\n", err.Error())
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+	commonhandler.Success(ctx, gin.H{
+		"message": "操作成功",
+	})
+}
+
+func (h *userHandler) enableUser(ctx *gin.Context) {
+	authUser := ctx.MustGet("user").(*dto.UserJWT)
+	goctx := ctx.Request.Context()
+	err := h.UserService.EnableUser(goctx, authUser.ID)
+	if err != nil {
+		log.Printf("用户启用失败: %v\n", err.Error())
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+	commonhandler.Success(ctx, gin.H{
+		"message": "操作成功",
 	})
 }

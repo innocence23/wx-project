@@ -45,7 +45,7 @@ func (s *userService) Signin(ctx context.Context, u *model.User) error {
 	user, err := s.UserRepository.FindByEmail(ctx, u.Email)
 	if err != nil {
 		log.Printf("用户邮箱不存在 email: %v\n", u.Email)
-		return zerror.NewInternal()
+		return err
 	}
 	match, err := comparePasswords(user.Password, u.Password)
 	if err != nil {
