@@ -18,11 +18,13 @@ func inject(d *gorm.DB) (*gin.Engine, error) {
 	userRepository := repository.NewUserRepository(d)
 	roleRepository := repository.NewRoleRepository(d)
 	permissionRepository := repository.NewPermissionRepository(d)
+	menuRepository := repository.NewMenuRepository(d)
 
 	// service
 	userService := service.NewUserService(userRepository)
 	roleService := service.NewRoleService(roleRepository)
 	permissionService := service.NewPermissionService(permissionRepository)
+	menuService := service.NewMenuService(menuRepository)
 
 	// handler
 	router := gin.Default()
@@ -32,6 +34,7 @@ func inject(d *gorm.DB) (*gin.Engine, error) {
 		UserService:       userService,
 		RoleService:       roleService,
 		PermissionService: permissionService,
+		MenuService:       menuService,
 	})
 
 	return router, nil

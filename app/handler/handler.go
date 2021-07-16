@@ -14,6 +14,7 @@ type Config struct {
 	UserService       iface.UserService
 	RoleService       iface.RoleService
 	PermissionService iface.PermissionService
+	MenuService       iface.MenuService
 }
 
 func NewHandler(c *Config) {
@@ -26,6 +27,7 @@ func NewHandler(c *Config) {
 	grouter.Use(middleware.RbacMiddleware())
 	NewRoleHandler(c.RoleService).Router(grouter)
 	NewPermissionHandler(c.PermissionService).Router(grouter)
+	NewMenuHandler(c.MenuService).Router(grouter)
 
 	component.Router = c.R
 }

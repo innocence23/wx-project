@@ -75,8 +75,8 @@ func (r *permissionRepository) Create(ctx context.Context, m *model.Permission) 
 
 func (r *permissionRepository) Update(ctx context.Context, m *model.Permission) error {
 	data := model.Permission{
-		PId:    m.PId,
 		Name:   m.Name,
+		Group:  m.Group,
 		Url:    m.Url,
 		Method: m.Method,
 	}

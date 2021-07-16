@@ -2,6 +2,8 @@ package component
 
 import (
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,9 +31,12 @@ func GetAllRoutes() []map[string]string {
 	}
 	appRouters := Router.Routes()
 	for _, route := range appRouters {
+		name := strings.Replace(route.Path, os.Getenv("APP_API_V1"), "", 1)
+		tmpList := strings.Split(name, "/")
+		name = tmpList[0]
 		routers = append(routers, map[string]string{
 			"url":    route.Path,
-			"name":   route.Path,
+			"name":   name,
 			"method": route.Method,
 		})
 	}

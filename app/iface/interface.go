@@ -58,3 +58,20 @@ type PermissionRepository interface {
 	UpdateStatus(ctx context.Context, id int64, status int) error
 	FindByUrlAndMethod(ctx context.Context, url, method string) (*model.Permission, error)
 }
+
+type MenuService interface {
+	Get(ctx context.Context, id int64) (*model.Menu, error)
+	List(ctx context.Context, where dto.MenuSearchReq) (dto.MenuListResp, error)
+	Create(ctx context.Context, m *model.Menu) (*model.Menu, error)
+	Update(ctx context.Context, m *model.Menu) error
+	Disable(ctx context.Context, id int64) error
+	Enable(ctx context.Context, id int64) error
+}
+
+type MenuRepository interface {
+	FindByID(ctx context.Context, id int64) (*model.Menu, error)
+	FindByWhere(ctx context.Context, where dto.MenuSearchReq) (dto.MenuListResp, error)
+	Create(ctx context.Context, m *model.Menu) (*model.Menu, error)
+	Update(ctx context.Context, m *model.Menu) error
+	UpdateStatus(ctx context.Context, id int64, status int) error
+}

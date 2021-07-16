@@ -2,11 +2,10 @@ package model
 
 import "time"
 
-
 type Permission struct {
 	Id        int64     `gorm:"column:id;primary_key;AUTO_INCREMENT" json:"id"`
-	PId       int64     `gorm:"column:p_id;default:1;NOT NULL" json:"p_id"`       // 节点位置 0:根结点;
 	Name      string    `gorm:"column:name;NOT NULL" json:"name"`                 // 权限名
+	Group      string    `gorm:"column:group;NOT NULL" json:"group"`                 // 权限名
 	Url       string    `gorm:"column:url;NOT NULL" json:"url"`                   // 路径
 	Method    string    `gorm:"column:method;default:GET;NOT NULL" json:"method"` // 方法名称
 	Status    int       `gorm:"column:status;default:1;NOT NULL" json:"status"`   // 状态: 1:正常; 2禁用

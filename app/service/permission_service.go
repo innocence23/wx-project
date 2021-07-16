@@ -48,6 +48,7 @@ func (s *permissionService) AutoGenerate(ctx context.Context, routers []map[stri
 		if res.Id == 0 {
 			m := &model.Permission{
 				Name:   router["name"],
+				Group:  router["name"],
 				Url:    router["url"],
 				Method: router["method"],
 			}

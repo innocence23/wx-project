@@ -3,7 +3,7 @@ package dto
 import "wx/app/model"
 
 type RoleIdReq struct {
-	ID int64 `json:"id" form:"id" binding:"required" label:"角色ID"`
+	ID int64 `json:"id" form:"id" binding:"required" label:"ID"`
 }
 
 type RoleCreateReq struct {
