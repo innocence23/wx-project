@@ -39,7 +39,7 @@ func (h *roleHandler) show(ctx *gin.Context) {
 	}
 	id := req.ID
 	goctx := ctx.Request.Context()
-	data, err := h.RoleService.Get(goctx, id)
+	result, err := h.RoleService.Get(goctx, id)
 	if err != nil {
 		log.Printf("信息不存在: %v \n%v", id, err)
 		e := zerror.NewNotFound("role", cast.ToString(id))
@@ -48,9 +48,7 @@ func (h *roleHandler) show(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"role": data,
-	})
+	commonhandler.Success(ctx, result)
 }
 
 func (h *roleHandler) list(ctx *gin.Context) {
@@ -69,9 +67,7 @@ func (h *roleHandler) list(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"users": list,
-	})
+	commonhandler.Success(ctx, list)
 }
 
 func (h *roleHandler) create(ctx *gin.Context) {
@@ -93,9 +89,7 @@ func (h *roleHandler) create(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"role": result,
-	})
+	commonhandler.Success(ctx, result)
 }
 
 func (h *roleHandler) update(ctx *gin.Context) {

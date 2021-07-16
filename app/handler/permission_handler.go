@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"wx/app/component"
 	"wx/app/dto"
 	"wx/app/handler/commonhandler"
 	"wx/app/iface"
@@ -30,6 +31,7 @@ func (h *permissionHandler) Router(router *gin.RouterGroup) {
 	grouter.PUT("", h.update)
 	grouter.PUT("/enable", h.enable)
 	grouter.PUT("/disable", h.disable)
+	grouter.PUT("/generate", h.generate)
 }
 
 func (h *permissionHandler) show(ctx *gin.Context) {
@@ -39,7 +41,7 @@ func (h *permissionHandler) show(ctx *gin.Context) {
 	}
 	id := req.ID
 	goctx := ctx.Request.Context()
-	data, err := h.PermissionService.Get(goctx, id)
+	result, err := h.PermissionService.Get(goctx, id)
 	if err != nil {
 		log.Printf("信息不存在: %v \n%v", id, err)
 		e := zerror.NewNotFound("permission", cast.ToString(id))
@@ -48,9 +50,7 @@ func (h *permissionHandler) show(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"permission": data,
-	})
+	commonhandler.Success(ctx, result)
 }
 
 func (h *permissionHandler) list(ctx *gin.Context) {
@@ -69,9 +69,7 @@ func (h *permissionHandler) list(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"users": list,
-	})
+	commonhandler.Success(ctx, list)
 }
 
 func (h *permissionHandler) create(ctx *gin.Context) {
@@ -94,9 +92,7 @@ func (h *permissionHandler) create(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"permission": result,
-	})
+	commonhandler.Success(ctx, result)
 }
 
 func (h *permissionHandler) update(ctx *gin.Context) {
@@ -153,6 +149,37 @@ func (h *permissionHandler) enable(ctx *gin.Context) {
 	goctx := ctx.Request.Context()
 	if err := h.PermissionService.Enable(goctx, id); err != nil {
 		log.Printf("数据启用失败: %v\n", err.Error())
+		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
+			"error": err,
+		})
+		return
+	}
+	commonhandler.Success(ctx, gin.H{
+		"message": "操作成功",
+	})
+}
+
+func (h *permissionHandler) generate(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		log.Printf("上下文中获取不到用户: %v\n", ctx)
+		e := zerror.NewInternal()
+		commonhandler.Fail(ctx, e.Status(), gin.H{
+			"error": e,
+		})
+		return
+	}
+	if user.(*dto.UserJWT).Name != "admin" {
+		e := zerror.NewAuthorization("没有权限")
+		commonhandler.Fail(ctx, e.Status(), gin.H{
+			"error": e,
+		})
+	}
+
+	routers := component.GetAllRoutes()
+	goctx := ctx.Request.Context()
+	if err := h.PermissionService.AutoGenerate(goctx, routers); err != nil {
+		log.Printf("自动化失败: %v\n", err.Error())
 		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
 			"error": err,
 		})

@@ -50,7 +50,7 @@ func (h *userHandler) me(ctx *gin.Context) {
 
 	id := user.(*dto.UserJWT).ID
 	goctx := ctx.Request.Context()
-	u, err := h.UserService.Get(goctx, id)
+	result, err := h.UserService.Get(goctx, id)
 	if err != nil {
 		log.Printf("无法找到用户: %v %#v\n%v", id, user, err)
 		e := zerror.NewNotFound("user", cast.ToString(id))
@@ -59,9 +59,7 @@ func (h *userHandler) me(ctx *gin.Context) {
 		})
 		return
 	}
-	commonhandler.Success(ctx, gin.H{
-		"user": u,
-	})
+	commonhandler.Success(ctx, result)
 }
 
 func (h *userHandler) signup(ctx *gin.Context) {

@@ -41,3 +41,21 @@ func (s *permissionService) Disable(ctx context.Context, id int64) error {
 func (s *permissionService) Enable(ctx context.Context, id int64) error {
 	return s.PermissionRepository.UpdateStatus(ctx, id, zconst.NormalStatus)
 }
+
+func (s *permissionService) AutoGenerate(ctx context.Context, routers []map[string]string) error {
+	for _, router := range routers {
+		res, _ := s.PermissionRepository.FindByUrlAndMethod(ctx, router["url"], router["method"])
+		if res.Id == 0 {
+			m := &model.Permission{
+				Name:   router["name"],
+				Url:    router["url"],
+				Method: router["method"],
+			}
+			_, err := s.PermissionRepository.Create(ctx, m)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

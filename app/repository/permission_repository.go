@@ -103,3 +103,16 @@ func (r *permissionRepository) UpdateStatus(ctx context.Context, id int64, statu
 	}
 	return nil
 }
+
+func (r *permissionRepository) FindByUrlAndMethod(ctx context.Context, url, method string) (*model.Permission, error) {
+	permission := &model.Permission{}
+	where := &model.Permission{
+		Url:    url,
+		Method: method,
+	}
+	if err := r.DB.Where(where).Select("id").First(permission).Error; err != nil && err != gorm.ErrRecordNotFound {
+		log.Printf("数据查询失败. 失败原因: %v\n", err)
+		return permission, zerror.NewNotFound("url-method", url+"-"+method)
+	}
+	return permission, nil
+}

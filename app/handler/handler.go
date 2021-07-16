@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"wx/app/component"
 	"wx/app/handler/middleware"
 	"wx/app/iface"
 
@@ -16,11 +17,15 @@ type Config struct {
 }
 
 func NewHandler(c *Config) {
-	g := c.R.Group(c.BaseUrlPath)
+	grouter := c.R.Group(c.BaseUrlPath)
 
-	NewUserHandler(c.UserService).Router(g)
+	grouter.Use(middleware.UrlPathMiddleware())
+	NewUserHandler(c.UserService).Router(grouter)
 
-	g.Use(middleware.JWTAuthMiddleware())
-	NewRoleHandler(c.RoleService).Router(g)
-	NewPermissionHandler(c.PermissionService).Router(g)
+	grouter.Use(middleware.JWTAuthMiddleware())
+	grouter.Use(middleware.RbacMiddleware())
+	NewRoleHandler(c.RoleService).Router(grouter)
+	NewPermissionHandler(c.PermissionService).Router(grouter)
+
+	component.Router = c.R
 }

@@ -15,6 +15,7 @@ func main() {
 	log.Println("Starting server...")
 
 	db := component.InitDB()
+	component.InitCasbin(db)
 	router, err := inject(db)
 	if err != nil {
 		log.Fatalf("Initialize inject error : %v\n", err)

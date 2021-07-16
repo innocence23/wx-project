@@ -20,7 +20,6 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 				"error": e,
 			})
 			c.Abort()
-			return
 		}
 		parts := strings.SplitN(authHeader, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
@@ -30,7 +29,6 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 				"error": e,
 			})
 			c.Abort()
-			return
 		}
 		result, err := component.ParseToken(parts[1])
 		if err != nil {
@@ -41,7 +39,6 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 				"error": e,
 			})
 			c.Abort()
-			return
 		}
 		c.Set("user", result.User)
 		c.Next()

@@ -47,6 +47,7 @@ type PermissionService interface {
 	Update(ctx context.Context, m *model.Permission) error
 	Disable(ctx context.Context, id int64) error
 	Enable(ctx context.Context, id int64) error
+	AutoGenerate(ctx context.Context, routers []map[string]string) error
 }
 
 type PermissionRepository interface {
@@ -55,4 +56,5 @@ type PermissionRepository interface {
 	Create(ctx context.Context, m *model.Permission) (*model.Permission, error)
 	Update(ctx context.Context, m *model.Permission) error
 	UpdateStatus(ctx context.Context, id int64, status int) error
+	FindByUrlAndMethod(ctx context.Context, url, method string) (*model.Permission, error)
 }

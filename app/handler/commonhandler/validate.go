@@ -1,7 +1,6 @@
 package commonhandler
 
 import (
-	"fmt"
 	"reflect"
 	"wx/app/zerror"
 
@@ -37,8 +36,6 @@ func init() {
 }
 
 func BindData(ctx *gin.Context, req interface{}) bool {
-
-	fmt.Printf("%#v %T\n", req, req)
 	if err := ctx.Bind(req); err != nil {
 		if errs, ok := err.(validator.ValidationErrors); ok {
 			var invalidArgs []invalidArgument
