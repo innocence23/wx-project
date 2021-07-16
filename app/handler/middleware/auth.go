@@ -34,7 +34,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 		}
 		result, err := component.ParseToken(parts[1])
 		if err != nil {
-			log.Printf("无效的Token: %#v\n", err)
+			log.Printf("无效的Token: %v\n", err)
 			msg := "无效的Token"
 			e := zerror.NewBadRequest(msg)
 			commonhandler.Fail(c, e.Status(), gin.H{

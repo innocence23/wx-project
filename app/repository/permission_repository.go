@@ -34,23 +34,23 @@ func (r *permissionRepository) FindByID(ctx context.Context, id int64) (*model.P
 
 func (r *permissionRepository) FindByWhere(ctx context.Context, where dto.PermissionSearchReq) (dto.PermissionListResp, error) {
 	permissions := make([]model.Permission, 0)
-	dd := r.DB.Model(&model.Permission{})
+	query := r.DB.Model(&model.Permission{})
 	if len(where.Name) > 0 {
-		dd = dd.Where("name like ?", "%"+where.Name+"%")
+		query = query.Where("name like ?", "%"+where.Name+"%")
 	}
 	if len(where.Url) > 0 {
-		dd = dd.Where("url like ?", "%"+where.Url+"%")
+		query = query.Where("url like ?", "%"+where.Url+"%")
 	}
 	if len(where.CreatedAtMin) > 0 {
-		dd = dd.Where("created_at >= ?", where.CreatedAtMin)
-		dd = dd.Where("created_at <= ?", where.CreatedAtMax)
+		query = query.Where("created_at >= ?", where.CreatedAtMin)
+		query = query.Where("created_at <= ?", where.CreatedAtMax)
 	}
 	var total int64 = 0
-	if err := dd.Count(&total).Error; err != nil {
+	if err := query.Count(&total).Error; err != nil {
 		return dto.PermissionListResp{}, zerror.NewInternal()
 	}
 
-	if err := dd.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&permissions).Error; err != nil {
+	if err := query.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&permissions).Error; err != nil {
 		log.Printf("数据查询失败， where: %#v. 失败原因: %v\n", where, err)
 		return dto.PermissionListResp{}, zerror.NewInternal()
 	}

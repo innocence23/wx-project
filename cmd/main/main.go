@@ -21,7 +21,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    os.Getenv("API_PORT"),
+		Addr:    os.Getenv("APP_PORT"),
 		Handler: router,
 	}
 

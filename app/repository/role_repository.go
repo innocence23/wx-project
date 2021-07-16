@@ -34,20 +34,20 @@ func (r *roleRepository) FindByID(ctx context.Context, id int64) (*model.Role, e
 
 func (r *roleRepository) FindByWhere(ctx context.Context, where dto.RoleSearchReq) (dto.RoleListResp, error) {
 	roles := make([]model.Role, 0)
-	dd := r.DB.Model(&model.Role{})
+	query := r.DB.Model(&model.Role{})
 	if len(where.Name) > 0 {
-		dd = dd.Where("name like ?", "%"+where.Name+"%")
+		query = query.Where("name like ?", "%"+where.Name+"%")
 	}
 	if len(where.CreatedAtMin) > 0 {
-		dd = dd.Where("created_at >= ?", where.CreatedAtMin)
-		dd = dd.Where("created_at <= ?", where.CreatedAtMax)
+		query = query.Where("created_at >= ?", where.CreatedAtMin)
+		query = query.Where("created_at <= ?", where.CreatedAtMax)
 	}
 	var total int64 = 0
-	if err := dd.Count(&total).Error; err != nil {
+	if err := query.Count(&total).Error; err != nil {
 		return dto.RoleListResp{}, zerror.NewInternal()
 	}
 
-	if err := dd.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
+	if err := query.Order("id DESC").Limit(where.PageSize).Offset((where.Page - 1) * where.PageSize).Find(&roles).Error; err != nil {
 		log.Printf("数据查询失败， where: %#v. 失败原因: %v\n", where, err)
 		return dto.RoleListResp{}, zerror.NewInternal()
 	}
