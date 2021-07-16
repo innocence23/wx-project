@@ -76,9 +76,10 @@ func (h *roleHandler) create(ctx *gin.Context) {
 		return
 	}
 	data := &model.Role{
-		Name:        req.Name,
-		Description: req.Description,
-		MenuIds:     req.MenuIds,
+		Name:            req.Name,
+		Description:     req.Description,
+		MenuIds:         req.MenuIds,
+		Permissions_ids: req.PermissionIds,
 	}
 	goctx := ctx.Request.Context()
 	result, err := h.RoleService.Create(goctx, data)
@@ -98,10 +99,11 @@ func (h *roleHandler) update(ctx *gin.Context) {
 		return
 	}
 	data := &model.Role{
-		Id:          req.ID,
-		Name:        req.Name,
-		Description: req.Description,
-		MenuIds:     req.MenuIds,
+		Id:              req.ID,
+		Name:            req.Name,
+		Description:     req.Description,
+		MenuIds:         req.MenuIds,
+		Permissions_ids: req.PermissionIds,
 	}
 	goctx := ctx.Request.Context()
 	err := h.RoleService.Update(goctx, data)

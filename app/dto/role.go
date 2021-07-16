@@ -7,16 +7,18 @@ type RoleIdReq struct {
 }
 
 type RoleCreateReq struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	MenuIds     string `json:"menu_ids" binding:"required"`
+	Name          string        `json:"name" binding:"required"`
+	Description   string        `json:"description" binding:"required"`
+	MenuIds       model.IntJson `json:"menu_ids" binding:"required"`
+	PermissionIds []int         `json:"permission_ids"`
 }
 
 type RoleUpdateReq struct {
-	ID          int64  `json:"id" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	MenuIds     string `json:"menu_ids" binding:"required"`
+	ID            int64         `json:"id" binding:"required"`
+	Name          string        `json:"name" binding:"required"`
+	Description   string        `json:"description" binding:"required"`
+	MenuIds       model.IntJson `json:"menu_ids" binding:"required"`
+	PermissionIds []int         `json:"permission_ids"`
 }
 
 type RoleSearchReq struct {

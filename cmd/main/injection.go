@@ -22,7 +22,7 @@ func inject(d *gorm.DB) (*gin.Engine, error) {
 
 	// service
 	userService := service.NewUserService(userRepository)
-	roleService := service.NewRoleService(roleRepository)
+	roleService := service.NewRoleService(roleRepository, permissionRepository)
 	permissionService := service.NewPermissionService(permissionRepository)
 	menuService := service.NewMenuService(menuRepository)
 
