@@ -25,7 +25,7 @@ func NewUserRepository(db *gorm.DB) iface.UserRepository {
 
 func (r *userRepository) FindByID(ctx context.Context, id int64) (*model.User, error) {
 	user := &model.User{}
-	if result := r.DB.Find(user, id); result.Error != nil || result.RowsAffected == 0 || user.Status == zconst.DisableStatus {
+	if result := r.DB.Find(user, id); result.Error != nil || result.RowsAffected == 0 {
 		log.Printf("数据查询失败， ID: %v. 失败原因: %v，影响行数:%d\n", id, result.Error, result.RowsAffected)
 		return user, zerror.NewNotFound("uid", cast.ToString(id))
 	}

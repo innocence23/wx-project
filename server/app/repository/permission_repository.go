@@ -6,7 +6,6 @@ import (
 	"wx/app/dto"
 	"wx/app/iface"
 	"wx/app/model"
-	"wx/app/zconst"
 	"wx/app/zerror"
 
 	"github.com/spf13/cast"
@@ -25,7 +24,7 @@ func NewPermissionRepository(db *gorm.DB) iface.PermissionRepository {
 
 func (r *permissionRepository) FindByID(ctx context.Context, id int64) (*model.Permission, error) {
 	permission := &model.Permission{}
-	if result := r.DB.Find(permission, id); result.Error != nil || result.RowsAffected == 0 || permission.Status == zconst.DisableStatus {
+	if result := r.DB.Find(permission, id); result.Error != nil || result.RowsAffected == 0 {
 		log.Printf("数据查询失败， ID: %v. 失败原因: %v，影响行数:%d\n", id, result.Error, result.RowsAffected)
 		return permission, zerror.NewNotFound("uid", cast.ToString(id))
 	}

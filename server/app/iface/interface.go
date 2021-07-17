@@ -15,7 +15,7 @@ type UserService interface {
 	Disable(ctx context.Context, id int64) error
 	Enable(ctx context.Context, id int64) error
 	Resetpwd(ctx context.Context, id int64) error
-	GetMenus(ctx context.Context, roles []int64) []model.Menu
+	GetMenus(ctx context.Context, roles []int64, email string) []model.Menu
 }
 
 type UserRepository interface {
@@ -77,6 +77,7 @@ type MenuService interface {
 type MenuRepository interface {
 	FindByID(ctx context.Context, id int64) (*model.Menu, error)
 	FindByIds(ctx context.Context, ids []int64) ([]model.Menu, error)
+	FindAll(ctx context.Context) ([]model.Menu, error)
 	FindByWhere(ctx context.Context, where dto.MenuSearchReq) (dto.MenuListResp, error)
 	Create(ctx context.Context, m *model.Menu) (*model.Menu, error)
 	Update(ctx context.Context, m *model.Menu) error

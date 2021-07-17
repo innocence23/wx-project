@@ -19,7 +19,7 @@ type SigninReq struct {
 }
 
 type UserUpdateReq struct {
-	Account string `json:"account" binding:"omitempty,max=50"`
+	Account string `json:"account" binding:"required,max=50"`
 	Avatar  string `json:"avatar" binding:"required"`
 }
 
@@ -29,7 +29,7 @@ type UserAddRolesReq struct {
 }
 
 type UserSearchReq struct {
-	Account      string `json:"account" binding:"omitempty,max=50"`
+	Account      string `json:"account"`
 	Email        string `json:"email"`
 	CreatedAtMin string `json:"created_at_min"`
 	CreatedAtMax string `json:"created_at_max"`
@@ -45,7 +45,6 @@ type UserListResp struct {
 type UserJWT struct {
 	ID          int64               `json:"id"`
 	Account     string              `json:"account"`
-	Description string              `json:"description,omitempty"`
 	Email       string              `json:"email"`
 	Avatar      string              `json:"avatar"`
 	Roles       []string            `json:"roles"` //ids

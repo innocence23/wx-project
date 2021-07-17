@@ -41,14 +41,6 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 			c.Abort()
 		}
 
-		//result.User.Menus = nil
-		// menus := admin.GetMenus(adminUser.Roles, adminUser.Account)
-		// fmt.Println(adminUser)
-		// adminUser.Menus = make([]menu.MenuRouter, len(menus))
-		// for k, menu := range menus {
-		// 	adminUser.Menus[k] = menu
-		// }
-
 		c.Set("user", result.User)
 		c.Next()
 	}

@@ -10,7 +10,7 @@ type MenuIdReq struct {
 }
 
 type MenuCreateReq struct {
-	PId         int64  `json:"p_id" binding:"required"`
+	PId         *int64 `json:"p_id" binding:"required"` // 可能为0
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	Url         string `json:"url" binding:"required"`
@@ -20,7 +20,7 @@ type MenuCreateReq struct {
 
 type MenuUpdateReq struct {
 	ID          int64  `json:"id" binding:"required"`
-	PId         int64  `json:"p_id" binding:"required"`
+	PId         *int64 `json:"p_id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description" binding:"required"`
 	Url         string `json:"url" binding:"required"`

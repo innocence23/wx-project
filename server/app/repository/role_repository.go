@@ -6,7 +6,6 @@ import (
 	"wx/app/dto"
 	"wx/app/iface"
 	"wx/app/model"
-	"wx/app/zconst"
 	"wx/app/zerror"
 
 	"github.com/spf13/cast"
@@ -25,7 +24,7 @@ func NewRoleRepository(db *gorm.DB) iface.RoleRepository {
 
 func (r *roleRepository) FindByID(ctx context.Context, id int64) (*model.Role, error) {
 	role := &model.Role{}
-	if result := r.DB.Find(role, id); result.Error != nil || result.RowsAffected == 0 || role.Status == zconst.DisableStatus {
+	if result := r.DB.Find(role, id); result.Error != nil || result.RowsAffected == 0 {
 		log.Printf("数据查询失败， ID: %v. 失败原因: %v，影响行数:%d\n", id, result.Error, result.RowsAffected)
 		return role, zerror.NewNotFound("uid", cast.ToString(id))
 	}

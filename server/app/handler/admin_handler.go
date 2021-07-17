@@ -29,6 +29,8 @@ func (h *adminHandler) Router(router *gin.RouterGroup) {
 	router.PUT("/disable", h.disable)
 	router.PUT("/resetpwd", h.resetpwd)
 	router.POST("/list", h.list)
+	router.PATCH("/role", h.setRoles)
+	router.GET("/role", h.getRoles)
 }
 
 func (h *adminHandler) info(ctx *gin.Context) {

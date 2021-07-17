@@ -30,8 +30,8 @@ func (h *userHandler) Router(router *gin.RouterGroup) {
 	router.POST("/signin", h.signin)
 	router.Use(middleware.JWTAuthMiddleware())
 	router.POST("/signout", h.signout)
-	router.POST("/me", h.signout)
-	router.PUT("/me", h.update)
+	router.GET("/me", h.me)
+	router.PUT("/update", h.update)
 
 }
 
@@ -168,7 +168,7 @@ func (h *userHandler) genUserJwt(ctx *gin.Context, u *model.User) *dto.UserJWT {
 		tmp = append(tmp, cast.ToInt64(v))
 	}
 	goctx := ctx.Request.Context()
-	uj.Menus = h.UserService.GetMenus(goctx, tmp)
+	uj.Menus = h.UserService.GetMenus(goctx, tmp, u.Email)
 
 	return uj
 }

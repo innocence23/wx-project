@@ -30,22 +30,22 @@ services:
     volumes:
       - ./server:/go/src/app
     command: reflex -r "\.go$$" -s -- sh -c "go run ./cmd/main/"
-  client:
-    build:
-      context: ./client
-    image: project-client # if we don't give image name, traefik won't create router 🤷‍♂️
-    expose:
-      - "3000"
-    ports:
-      - "3000:3000"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.project-client.rule=Host(`project.test`) && PathPrefix(`/`)"
-    volumes:
-      - ./client:/app
-      - /app/node_modules #avoid overwriting node_modules
-    depends_on: 
-      - reverse-proxy    
+  # client:
+  #   build:
+  #     context: ./client
+  #   image: project-client # if we don't give image name, traefik won't create router 🤷‍♂️
+  #   expose:
+  #     - "3000"
+  #   ports:
+  #     - "3000:3000"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.project-client.rule=Host(`project.test`) && PathPrefix(`/`)"
+  #   volumes:
+  #     - ./client:/app
+  #     - /app/node_modules #avoid overwriting node_modules
+  #   depends_on: 
+  #     - reverse-proxy    
   mysql:
     image: mysql:5.7
     environment:

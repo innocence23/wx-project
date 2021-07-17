@@ -25,7 +25,7 @@ func NewMenuRepository(db *gorm.DB) iface.MenuRepository {
 
 func (r *menuRepository) FindByID(ctx context.Context, id int64) (*model.Menu, error) {
 	menu := &model.Menu{}
-	if result := r.DB.Find(menu, id); result.Error != nil || result.RowsAffected == 0 || menu.Status == zconst.DisableStatus {
+	if result := r.DB.Find(menu, id); result.Error != nil || result.RowsAffected == 0 {
 		log.Printf("数据查询失败， ID: %v. 失败原因: %v，影响行数:%d\n", id, result.Error, result.RowsAffected)
 		return menu, zerror.NewNotFound("uid", cast.ToString(id))
 	}
@@ -110,4 +110,14 @@ func (r *menuRepository) UpdateStatus(ctx context.Context, id int64, status int)
 		return zerror.NewNotFound("id", cast.ToString(id))
 	}
 	return nil
+}
+
+func (r *menuRepository) FindAll(ctx context.Context) ([]model.Menu, error) {
+	menus := make([]model.Menu, 0)
+	query := r.DB.Where("status = ", zconst.NormalStatus).Order("weight DESC")
+	if err := query.Find(&menus).Error; err != nil {
+		log.Printf("数据查询失败. 失败原因: %v\n", err)
+		return menus, zerror.NewInternal()
+	}
+	return menus, nil
 }

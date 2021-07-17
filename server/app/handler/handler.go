@@ -24,7 +24,7 @@ func NewHandler(c *Config) {
 	NewUserHandler(c.UserService).Router(grouter)
 
 	grouter.Use(middleware.JWTAuthMiddleware())
-	//grouter.Use(middleware.RbacMiddleware())
+	grouter.Use(middleware.RbacMiddleware())
 	NewAdminHandler(c.UserService).Router(grouter)
 	NewRoleHandler(c.RoleService).Router(grouter)
 	NewPermissionHandler(c.PermissionService).Router(grouter)

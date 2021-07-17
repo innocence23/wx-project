@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"os"
 	"wx/app/component"
 	"wx/app/dto"
 	"wx/app/handler/commonhandler"
@@ -21,6 +22,10 @@ func RbacMiddleware() func(ctx *gin.Context) {
 			c.Abort()
 		}
 		name := user.(*dto.UserJWT).Email
+		if name == os.Getenv("ACCOUNT") {
+			c.Next()
+			return
+		}
 		permission := c.FullPath()
 		method := c.Request.Method
 		if !component.CheckPermission(name, permission, method) {

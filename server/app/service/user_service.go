@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"wx/app/dto"
 	"wx/app/iface"
@@ -128,11 +129,17 @@ func comparePasswords(storedPassword string, suppliedPassword string) (bool, err
 }
 
 //--- 权限
-func (s *userService) GetMenus(ctx context.Context, roleIds []int64) []model.Menu {
+func (s *userService) GetMenus(ctx context.Context, roleIds []int64, email string) []model.Menu {
 	var roleList []model.Role
 	var menuList []model.Menu
 	var menu_ids []int64
-	var level int64 = 0
+	var level int64 = 1
+	if email == os.Getenv("ACCOUNT") {
+		menuList, _ = s.MenuRepository.FindAll(ctx)
+		menuList = GetMenuTreeRouter(menuList, level)
+		return menuList
+	}
+
 	roleList, _ = s.RoleRepository.FindByIds(ctx, roleIds)
 	for _, role := range roleList {
 		menu_ids = append(menu_ids, role.MenuIds...)

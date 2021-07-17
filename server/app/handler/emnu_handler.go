@@ -76,7 +76,7 @@ func (h *menuHandler) create(ctx *gin.Context) {
 		return
 	}
 	data := &model.Menu{
-		PId:         req.PId,
+		PId:         *req.PId,
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         req.Url,
@@ -102,7 +102,7 @@ func (h *menuHandler) update(ctx *gin.Context) {
 	}
 	data := &model.Menu{
 		Id:          req.ID,
-		PId:         req.PId,
+		PId:         *req.PId,
 		Name:        req.Name,
 		Description: req.Description,
 		Url:         req.Url,
