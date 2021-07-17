@@ -1,0 +1,19 @@
+{
+    "folders": [
+      {
+        "name": "server",
+        "path": "server"
+      },
+      {
+        "name": "client",
+        "path": "client"
+      },
+      {
+        "name": "wx-project",
+        "path": "."
+      }
+    ],
+    "settings": {
+      "css.validate": false
+    }
+  }

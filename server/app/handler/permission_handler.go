@@ -41,7 +41,7 @@ func (h *permissionHandler) show(ctx *gin.Context) {
 	}
 	id := req.ID
 	goctx := ctx.Request.Context()
-	result, err := h.PermissionService.Get(goctx, id)
+	result, err := h.PermissionService.Find(goctx, id)
 	if err != nil {
 		log.Printf("信息不存在: %v \n%v", id, err)
 		e := zerror.NewNotFound("permission", cast.ToString(id))

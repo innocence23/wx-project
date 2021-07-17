@@ -18,7 +18,7 @@ func NewPermissionService(r iface.PermissionRepository) iface.PermissionService 
 	}
 }
 
-func (s *permissionService) Get(ctx context.Context, id int64) (*model.Permission, error) {
+func (s *permissionService) Find(ctx context.Context, id int64) (*model.Permission, error) {
 	return s.PermissionRepository.FindByID(ctx, id)
 }
 

@@ -1,0 +1,5 @@
+.vscode
+server/logs
+server/db.sql
+server/bin/
+client/node_modules

@@ -23,7 +23,7 @@ func NewRoleService(r iface.RoleRepository, p iface.PermissionRepository) iface.
 	}
 }
 
-func (s *roleService) Get(ctx context.Context, id int64) (*model.Role, error) {
+func (s *roleService) Find(ctx context.Context, id int64) (*model.Role, error) {
 	return s.RoleRepository.FindByID(ctx, id)
 }
 
@@ -33,13 +33,14 @@ func (s *roleService) List(ctx context.Context, where dto.RoleSearchReq) (dto.Ro
 
 func (s *roleService) Create(ctx context.Context, m *model.Role) (*model.Role, error) {
 	result, err := s.RoleRepository.Create(ctx, m)
-	_, err = component.AddRoleForUser("-", m.Name)
-	s.updatePermissinForRole(ctx, m.Permissions_ids, m.Name)
+	s.updatePermissinForRole(ctx, m.Permissions_ids, cast.ToString(m.Id))
 	return result, err
 }
 
 func (s *roleService) Update(ctx context.Context, m *model.Role) error {
-	return s.RoleRepository.Update(ctx, m)
+	err := s.RoleRepository.Update(ctx, m)
+	s.updatePermissinForRole(ctx, m.Permissions_ids, cast.ToString(m.Id))
+	return err
 }
 
 func (s *roleService) Disable(ctx context.Context, id int64) error {
@@ -51,9 +52,9 @@ func (s *roleService) Enable(ctx context.Context, id int64) error {
 }
 
 // 更新角色权限
-func (s *roleService) updatePermissinForRole(ctx context.Context, permissionIds []int, roleAccount string) {
+func (s *roleService) updatePermissinForRole(ctx context.Context, permissionIds []int, roleID string) {
 	for _, pid := range permissionIds {
 		result, _ := s.PermissionRepository.FindByID(ctx, cast.ToInt64(pid))
-		component.AddPermissionForUser(result.Url, result.Method, roleAccount)
+		component.AddPermissionForUser(result.Url, result.Method, roleID)
 	}
 }

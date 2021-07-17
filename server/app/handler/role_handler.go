@@ -39,7 +39,7 @@ func (h *roleHandler) show(ctx *gin.Context) {
 	}
 	id := req.ID
 	goctx := ctx.Request.Context()
-	result, err := h.RoleService.Get(goctx, id)
+	result, err := h.RoleService.Find(goctx, id)
 	if err != nil {
 		log.Printf("信息不存在: %v \n%v", id, err)
 		e := zerror.NewNotFound("role", cast.ToString(id))

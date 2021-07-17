@@ -39,7 +39,7 @@ func (h *menuHandler) show(ctx *gin.Context) {
 	}
 	id := req.ID
 	goctx := ctx.Request.Context()
-	result, err := h.MenuService.Get(goctx, id)
+	result, err := h.MenuService.Find(goctx, id)
 	if err != nil {
 		log.Printf("信息不存在: %v \n%v", id, err)
 		e := zerror.NewNotFound("menu", cast.ToString(id))

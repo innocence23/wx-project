@@ -22,7 +22,7 @@ func NewMenuService(r iface.MenuRepository, r1 iface.RoleRepository, r2 iface.Pe
 	}
 }
 
-func (s *menuService) Get(ctx context.Context, id int64) (*model.Menu, error) {
+func (s *menuService) Find(ctx context.Context, id int64) (*model.Menu, error) {
 	return s.MenuRepository.FindByID(ctx, id)
 }
 

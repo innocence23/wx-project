@@ -25,16 +25,14 @@ func NewUserHandler(s iface.UserService) *userHandler {
 }
 
 func (h *userHandler) Router(router *gin.RouterGroup) {
-	//xrouter := router.Group("/x")
+	router = router.Group("/uc")
 	router.POST("/signup", h.signup)
 	router.POST("/signin", h.signin)
-
 	router.Use(middleware.JWTAuthMiddleware())
 	router.POST("/signout", h.signout)
-	router.PUT("/user", h.updateUser)
-	router.GET("/user/info", h.me)
-	router.PUT("/user/enable", h.enableUser)
-	router.PUT("/user/disable", h.disableUser)
+	router.POST("/me", h.signout)
+	router.PUT("/me", h.update)
+
 }
 
 func (h *userHandler) me(ctx *gin.Context) {
@@ -47,33 +45,7 @@ func (h *userHandler) me(ctx *gin.Context) {
 		})
 		return
 	}
-
 	result := user.(*dto.UserJWT)
-	commonhandler.Success(ctx, result)
-}
-
-func (h *userHandler) me2(ctx *gin.Context) {
-	user, exists := ctx.Get("user")
-	if !exists {
-		log.Printf("上下文中获取不到用户: %v\n", ctx)
-		e := zerror.NewInternal()
-		commonhandler.Fail(ctx, e.Status(), gin.H{
-			"error": e,
-		})
-		return
-	}
-
-	id := user.(*dto.UserJWT).ID
-	goctx := ctx.Request.Context()
-	result, err := h.UserService.Get(goctx, id)
-	if err != nil {
-		log.Printf("无法找到用户: %v %#v\n%v", id, user, err)
-		e := zerror.NewNotFound("user", cast.ToString(id))
-		commonhandler.Fail(ctx, e.Status(), gin.H{
-			"error": e,
-		})
-		return
-	}
 	commonhandler.Success(ctx, result)
 }
 
@@ -97,12 +69,7 @@ func (h *userHandler) signup(ctx *gin.Context) {
 		return
 	}
 
-	uj := &dto.UserJWT{
-		ID:      u.ID,
-		Account: u.Account,
-		Email:   u.Email,
-		Avatar:  u.Avatar,
-	}
+	uj := h.genUserJwt(ctx, u)
 	token, err := component.GenerateToken(uj)
 	if err != nil {
 		log.Printf("token生成失败: %v\n", err.Error())
@@ -136,20 +103,7 @@ func (h *userHandler) signin(ctx *gin.Context) {
 		return
 	}
 
-	uj := &dto.UserJWT{
-		ID:      u.ID,
-		Account: u.Account,
-		Email:   u.Email,
-		Avatar:  u.Avatar,
-	}
-	uj.Roles, _ = component.GetRolesForUser(uj.Email)
-	uj.Permissions = component.GetPermissionsForUser(uj.Email)
-	var tmp []int64
-	for _, v := range uj.Roles {
-		tmp = append(tmp, cast.ToInt64(v))
-	}
-	uj.Menus = h.UserService.GetMenus(goctx, tmp, "")
-
+	uj := h.genUserJwt(ctx, u)
 	token, err := component.GenerateToken(uj)
 	if err != nil {
 		log.Printf("token生成失败 user: %v\n", err.Error())
@@ -172,20 +126,20 @@ func (h *userHandler) signout(ctx *gin.Context) {
 	})
 }
 
-func (h *userHandler) updateUser(ctx *gin.Context) {
-	var req dto.DetailsReq
+func (h *userHandler) update(ctx *gin.Context) {
+	var req dto.UserUpdateReq
 	if ok := commonhandler.BindData(ctx, &req); !ok {
 		return
 	}
 
-	authUser := ctx.MustGet("user").(*dto.UserJWT)
+	authAdmin := ctx.MustGet("user").(*dto.UserJWT)
 	u := &model.User{
-		ID:      authUser.ID,
+		ID:      authAdmin.ID,
 		Account: req.Account,
 		Avatar:  req.Avatar,
 	}
 	goctx := ctx.Request.Context()
-	err := h.UserService.UpdateDetail(goctx, u)
+	err := h.UserService.Update(goctx, u)
 	if err != nil {
 		log.Printf("更新用户失败: %v\n", err.Error())
 		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
@@ -193,40 +147,28 @@ func (h *userHandler) updateUser(ctx *gin.Context) {
 		})
 		return
 	}
-
 	commonhandler.Success(ctx, gin.H{
 		"message": "操作成功",
 	})
 }
 
-func (h *userHandler) disableUser(ctx *gin.Context) {
-	authUser := ctx.MustGet("user").(*dto.UserJWT)
-	goctx := ctx.Request.Context()
-	err := h.UserService.DisableUser(goctx, authUser.ID)
-	if err != nil {
-		log.Printf("用户禁用失败: %v\n", err.Error())
-		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
-			"error": err,
-		})
-		return
+//组装jwt数据
+func (h *userHandler) genUserJwt(ctx *gin.Context, u *model.User) *dto.UserJWT {
+	uj := &dto.UserJWT{
+		ID:      u.ID,
+		Account: u.Account,
+		Email:   u.Email,
+		Avatar:  u.Avatar,
 	}
-	commonhandler.Success(ctx, gin.H{
-		"message": "操作成功",
-	})
-}
+	id := cast.ToString(uj.ID)
+	uj.Roles, _ = component.GetRolesForUser(id)
+	uj.Permissions = component.GetPermissionsForUser(id)
+	var tmp []int64
+	for _, v := range uj.Roles {
+		tmp = append(tmp, cast.ToInt64(v))
+	}
+	goctx := ctx.Request.Context()
+	uj.Menus = h.UserService.GetMenus(goctx, tmp)
 
-func (h *userHandler) enableUser(ctx *gin.Context) {
-	authUser := ctx.MustGet("user").(*dto.UserJWT)
-	goctx := ctx.Request.Context()
-	err := h.UserService.EnableUser(goctx, authUser.ID)
-	if err != nil {
-		log.Printf("用户启用失败: %v\n", err.Error())
-		commonhandler.Fail(ctx, zerror.Status(err), gin.H{
-			"error": err,
-		})
-		return
-	}
-	commonhandler.Success(ctx, gin.H{
-		"message": "操作成功",
-	})
+	return uj
 }
