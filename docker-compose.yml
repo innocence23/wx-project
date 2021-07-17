@@ -11,25 +11,41 @@ services:
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  project:
+  server:
     build:
-      context: .
+      context: ./server
       target: builder
-    image: project_wx
+    image: project-server
     restart: always  #解决mysql启动后，还没创建完数据库，程序报错问题
     expose:
       - "8080"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wx.rule=Host(`wx.test`)"
+      - "traefik.http.routers.project-server.rule=Host(`project.test`) && PathPrefix(`/api`)"
     environment:
       - ENV=dev
-    env_file: .env.dev
+    env_file: server/.env.dev
     depends_on: 
       - mysql
     volumes:
-      - ./:/go/src/app
+      - ./server:/go/src/app
     command: reflex -r "\.go$$" -s -- sh -c "go run ./cmd/main/"
+  client:
+    build:
+      context: ./client
+    image: project-client # if we don't give image name, traefik won't create router 🤷‍♂️
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.project-client.rule=Host(`project.test`) && PathPrefix(`/`)"
+    volumes:
+      - ./client:/app
+      - /app/node_modules #avoid overwriting node_modules
+    depends_on: 
+      - reverse-proxy    
   mysql:
     image: mysql:5.7
     environment:
@@ -40,7 +56,7 @@ services:
     ports:
       - 33060:3306
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysqldataz:/var/lib/mysql  #不能加一加就错
   redis:
     image: redis:alpine
